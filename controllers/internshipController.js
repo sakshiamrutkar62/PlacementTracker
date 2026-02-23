@@ -52,17 +52,10 @@ exports.getAllInternships = async (req, res) => {
     };
 
     try {
-        const [{ data: internships, error: internshipsError }, companiesResult] = await Promise.all([
-            supabase
-                .from('internships')
-                .select('*')
-                .order('posted_at', { ascending: false }),
-            pool.query(`
-                SELECT id, name, role, package, location, deadline, required_skills, created_at
-                FROM companies
-                ORDER BY created_at DESC
-            `)
-        ]);
+        const { data: internships, error: internshipsError } = await supabase
+            .from('internships')
+            .select('*')
+            .order('posted_at', { ascending: false });
 
         if (internshipsError) return res.status(400).json({ error: internshipsError.message });
 
@@ -73,26 +66,7 @@ exports.getAllInternships = async (req, res) => {
             required_skills: parseSkills(row.required_skills)
         }));
 
-        const companyRows = (companiesResult.rows || []).map(row => ({
-            id: `company-${row.id}`,
-            source_table: 'companies',
-            source_id: row.id,
-            apply_enabled: false,
-            company_name: row.name,
-            role_title: row.role,
-            stipend: row.package,
-            duration: 'Not specified',
-            mode: 'Not specified',
-            type: 'Job',
-            location: row.location,
-            required_skills: parseSkills(row.required_skills),
-            deadline: row.deadline,
-            posted_at: row.created_at
-        }));
-
-        const unifiedData = [...internshipRows, ...companyRows].sort(
-            (a, b) => new Date(b.posted_at || 0) - new Date(a.posted_at || 0)
-        );
+        const unifiedData = internshipRows;
 
         if (req.user && req.user.id) {
             try {

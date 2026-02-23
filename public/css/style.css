@@ -26,13 +26,113 @@
 
 body {
     background-color: #f8fafc;
-    /* Very light blue-grey */
     background-image: radial-gradient(#e0e7ff 1px, transparent 1px);
-    /* Subtle dot pattern */
     background-size: 20px 20px;
     color: var(--dark);
     height: 100vh;
     overflow: hidden;
+}
+
+/* Mobile-only top bar (hidden on desktop) */
+.mobile-topbar {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1rem;
+    height: 56px;
+    background: white;
+    border-bottom: 1px solid #e2e8f0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 200;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.mobile-topbar .brand {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.hamburger-btn {
+    background: none;
+    border: none;
+    font-size: 1.3rem;
+    cursor: pointer;
+    color: #374151;
+    padding: 6px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.hamburger-btn:hover {
+    background: #f1f5f9;
+}
+
+/* Sidebar overlay for mobile */
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.45);
+    z-index: 299;
+    backdrop-filter: blur(2px);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.sidebar-overlay.open {
+    opacity: 1;
+}
+
+.sidebar-close-btn {
+    display: none;
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: #64748b;
+    padding: 6px;
+    border-radius: 6px;
+}
+
+.sidebar-close-btn:hover {
+    background: #f1f5f9;
+    color: #ef4444;
+}
+
+[data-theme="dark"] .mobile-topbar {
+    background: #1e293b;
+    border-bottom-color: #334155;
+}
+
+[data-theme="dark"] .mobile-topbar .brand {
+    color: #818cf8;
+}
+
+[data-theme="dark"] .hamburger-btn {
+    color: #94a3b8;
+}
+
+[data-theme="dark"] .hamburger-btn:hover {
+    background: #334155;
+}
+
+[data-theme="dark"] .sidebar-close-btn {
+    color: #94a3b8;
 }
 
 /* --- LAYOUT --- */
@@ -1358,43 +1458,280 @@ tr:hover td {
     background: #475569;
 }
 
-/* --- RESPONSIVE IMPROVEMENTS --- */
+/* =====================================================
+   COMPREHENSIVE RESPONSIVE DESIGN
+   ===================================================== */
+
+/* --- TABLET (900px) --- */
 @media (max-width: 900px) {
     .sidebar {
-        width: 220px;
+        width: 230px;
+    }
+
+    .admin-stat-bar {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+
+    .form-grid-3 {
+        grid-template-columns: 1fr 1fr !important;
     }
 }
 
+/* --- MOBILE (768px) --- */
 @media (max-width: 768px) {
+
+    /* --- Body: allow scroll on mobile --- */
+    body {
+        height: auto;
+        overflow: auto;
+    }
+
+    /* --- Layout: push content below topbar --- */
+    .dashboard-container {
+        flex-direction: column;
+        height: auto;
+        min-height: 100vh;
+        padding-top: 56px;
+    }
+
+    /* --- Mobile topbar visible --- */
+    .mobile-topbar {
+        display: flex;
+    }
+
+    /* --- Sidebar: hidden drawer by default --- */
     .sidebar {
-        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        width: 270px;
+        z-index: 300;
+        padding-top: 1.5rem;
+        transform: translateX(-100%);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: none;
+        overflow-y: auto;
     }
 
+    .sidebar.open {
+        transform: translateX(0);
+        box-shadow: 4px 0 32px rgba(0, 0, 0, 0.18);
+    }
+
+    /* Show sidebar close button on mobile */
+    .sidebar-close-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Show overlay when sidebar open */
+    .sidebar-overlay {
+        display: block;
+    }
+
+    /* --- Main content fills full width --- */
     .main-content {
+        width: 100%;
         padding: 1rem;
+        overflow-y: visible;
+        flex: 1;
     }
 
+    /* --- Jobs grid: single column --- */
     .jobs-grid {
         grid-template-columns: 1fr;
     }
 
+    /* --- Stats: 2 columns on mobile --- */
     .stats-container {
         grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
     }
 
+    /* --- Search bar: stacked --- */
     .search-bar-container {
         flex-direction: column;
+        align-items: stretch;
     }
 
     .filter-chips {
         width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
     }
 
     .filter-select {
-        flex: 1;
+        width: 100%;
     }
 
-    body {
-        overflow: auto;
+    /* --- Toggle buttons: wrap --- */
+    .toggle-container {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+    }
+
+    .toggle-btn {
+        white-space: nowrap;
+        padding: 7px 13px;
+    }
+
+    /* --- Auth card: smaller padding on mobile --- */
+    .auth-card {
+        padding: 2rem 1.5rem;
+        border-radius: 18px;
+    }
+
+    /* --- Forms: single column --- */
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-grid-3 {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* --- Admin stat bar: 2 columns --- */
+    .admin-stat-bar {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px !important;
+    }
+
+    /* --- Admin actions header: stack --- */
+    .header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .header > div:last-child {
+        width: 100%;
+    }
+
+    .header input[type="text"],
+    .header .form-input,
+    .header .search-input {
+        width: 100% !important;
+    }
+
+    .header .filter-select {
+        width: 100%;
+    }
+
+    /* --- Card overflow: horizontal scroll for tables --- */
+    .card {
+        overflow-x: auto;
+    }
+
+    /* --- Stat card: compact --- */
+    .stat-card {
+        padding: 1rem;
+    }
+
+    .stat-number {
+        font-size: 1.8rem;
+    }
+
+    /* --- Profile header buttons: stacked --- */
+    #tab-profile .header > div {
+        width: 100%;
+    }
+
+    #tab-profile .header > div:last-child {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+
+    #tab-profile .header button {
+        flex: 1;
+        justify-content: center;
+        font-size: 0.82rem;
+        padding: 8px 10px;
+    }
+
+    /* --- Resume section --- */
+    .resume-section {
+        padding: 2rem 1.5rem;
+    }
+
+    /* --- Modal: full screen on mobile --- */
+    .modal-content {
+        width: 96%;
+        max-width: 100%;
+        max-height: 92vh;
+        padding: 1.5rem;
+        border-radius: 16px;
+    }
+
+    /* --- Admin action header inputs in one column --- */
+    #tab-applicants .header,
+    #tab-students .header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    #tab-applicants .header > div:last-child,
+    #tab-students .header > div:last-child {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        width: 100%;
+    }
+
+    #tab-applicants .header button,
+    #tab-students .header button {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* --- SMALL PHONES (480px) --- */
+@media (max-width: 480px) {
+    .stats-container {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+    }
+
+    .stat-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+        padding: 0.9rem;
+    }
+
+    .stat-number {
+        font-size: 1.6rem;
+    }
+
+    .admin-stat-bar {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 8px !important;
+    }
+
+    .filter-chips {
+        grid-template-columns: 1fr;
+    }
+
+    .auth-card {
+        padding: 1.75rem 1.25rem;
+    }
+
+    .auth-header h1 {
+        font-size: 1.6rem;
+    }
+
+    .jobs-grid {
+        gap: 1rem;
+    }
+
+    .job-card {
+        min-height: auto;
+    }
+
+    .toggle-btn {
+        font-size: 0.78rem;
+        padding: 6px 11px;
     }
 }

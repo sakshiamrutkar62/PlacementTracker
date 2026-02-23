@@ -14,15 +14,35 @@
 </head>
 
 <body>
+    <!-- ====== MOBILE TOPBAR ====== -->
+    <div class="mobile-topbar">
+        <button class="hamburger-btn" onclick="toggleSidebar()" aria-label="Open menu">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="brand">
+            <i class="fas fa-graduation-cap"></i>
+            <span>ECampus</span>
+        </div>
+        <button class="hamburger-btn" onclick="logout()" aria-label="Logout" title="Logout">
+            <i class="fas fa-sign-out-alt"></i>
+        </button>
+    </div>
+
+    <!-- ====== SIDEBAR OVERLAY (mobile) ====== -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
     <!-- ====== TOAST CONTAINER ====== -->
     <div id="toastContainer"
-        style="position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:10px;pointer-events:none;">
+        style="position:fixed;top:70px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:10px;pointer-events:none;">
     </div>
 
     <div class="dashboard-container">
 
         <!-- ====== SIDEBAR ====== -->
-        <aside class="sidebar">
+        <aside class="sidebar" id="mainSidebar">
+            <button class="sidebar-close-btn" onclick="closeSidebar()" aria-label="Close menu">
+                <i class="fas fa-times"></i>
+            </button>
             <div class="brand">
                 <i class="fas fa-graduation-cap"></i>
                 <span>ECampus</span>
@@ -428,6 +448,28 @@
 
     <script src="js/config.js"></script>
     <script src="js/dashboard.js"></script>
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('mainSidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('open');
+            document.body.style.overflow = sidebar.classList.contains('open') ? 'hidden' : '';
+        }
+        function closeSidebar() {
+            const sidebar = document.getElementById('mainSidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.remove('open');
+            overlay.classList.remove('open');
+            document.body.style.overflow = '';
+        }
+        // Close sidebar on nav item click (mobile UX)
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                if (window.innerWidth <= 768) closeSidebar();
+            });
+        });
+    </script>
 </body>
 
 </html>

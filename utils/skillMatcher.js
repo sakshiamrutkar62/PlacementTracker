@@ -10,7 +10,7 @@ const supabase = require('../config/supabaseClient');
 function calculateMatchRatio(userVerifiedSkills, requiredSkills) {
     if (!Array.isArray(userVerifiedSkills)) userVerifiedSkills = [];
     if (!Array.isArray(requiredSkills)) requiredSkills = [];
-    
+
     if (requiredSkills.length === 0) {
         return {
             matchRatio: 100,
@@ -27,15 +27,15 @@ function calculateMatchRatio(userVerifiedSkills, requiredSkills) {
     const requiredSkillsLower = requiredSkills.map(s => String(s).toLowerCase().trim());
 
     // Find matched and missing skills
-    const matchedSkills = requiredSkillsLower.filter(reqSkill => 
-        userSkillsLower.some(userSkill => 
-            userSkill === reqSkill || 
-            userSkill.includes(reqSkill) || 
+    const matchedSkills = requiredSkillsLower.filter(reqSkill =>
+        userSkillsLower.some(userSkill =>
+            userSkill === reqSkill ||
+            userSkill.includes(reqSkill) ||
             reqSkill.includes(userSkill)
         )
     );
 
-    const missingSkills = requiredSkillsLower.filter(reqSkill => 
+    const missingSkills = requiredSkillsLower.filter(reqSkill =>
         !matchedSkills.includes(reqSkill)
     );
 
@@ -76,7 +76,7 @@ async function getJobsWithMatchRatios(userId) {
             'SELECT verified_skills FROM users WHERE id = $1',
             [userId]
         );
-        
+
         const userVerifiedSkills = userResult.rows[0]?.verified_skills || [];
 
         // Get all internships/jobs
@@ -92,12 +92,12 @@ async function getJobsWithMatchRatios(userId) {
 
         // Calculate match ratios for each job
         const jobsWithMatches = (jobs || []).map(job => {
-            const requiredSkills = Array.isArray(job.required_skills) 
-                ? job.required_skills 
+            const requiredSkills = Array.isArray(job.required_skills)
+                ? job.required_skills
                 : [];
-            
+
             const matchInfo = calculateMatchRatio(userVerifiedSkills, requiredSkills);
-            
+
             return {
                 ...job,
                 matchInfo: {
@@ -111,7 +111,7 @@ async function getJobsWithMatchRatios(userId) {
         });
 
         // Sort by match ratio (highest first)
-        return jobsWithMatches.sort((a, b) => 
+        return jobsWithMatches.sort((a, b) =>
             b.matchInfo.matchPercentage - a.matchInfo.matchPercentage
         );
     } catch (err) {

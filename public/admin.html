@@ -17,6 +17,9 @@
             margin-bottom: 24px;
         }
 
+        @media (max-width: 900px) { .admin-stat-bar { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 480px)  { .admin-stat-bar { grid-template-columns: repeat(2, 1fr); gap: 10px; } }
+
         .admin-stat {
             background: white;
             border-radius: 16px;
@@ -64,6 +67,9 @@
             grid-template-columns: repeat(3, 1fr);
             gap: 1rem;
         }
+
+        @media (max-width: 900px) { .form-grid-3 { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 768px) { .form-grid-3 { grid-template-columns: 1fr; } }
 
         .offer-tag {
             display: inline-block;
@@ -187,9 +193,29 @@
     <!-- Toast Container -->
     <div id="toast-admin"></div>
 
+    <!-- ====== MOBILE TOPBAR ====== -->
+    <div class="mobile-topbar">
+        <button class="hamburger-btn" onclick="toggleAdminSidebar()" aria-label="Open menu">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="brand">
+            <i class="fas fa-shield-halved"></i>
+            <span>Admin</span>
+        </div>
+        <button class="hamburger-btn" onclick="logout()" aria-label="Logout" title="Logout">
+            <i class="fas fa-sign-out-alt"></i>
+        </button>
+    </div>
+
+    <!-- ====== SIDEBAR OVERLAY (mobile) ====== -->
+    <div class="sidebar-overlay" id="adminSidebarOverlay" onclick="closeAdminSidebar()"></div>
+
     <div class="dashboard-container">
         <!-- ===== SIDEBAR ===== -->
-        <aside class="sidebar">
+        <aside class="sidebar" id="adminSidebar">
+            <button class="sidebar-close-btn" onclick="closeAdminSidebar()" aria-label="Close menu">
+                <i class="fas fa-times"></i>
+            </button>
             <div class="brand">
                 <i class="fas fa-shield-halved"></i>
                 <span>ECampus <span style="color:var(--primary)">Admin</span></span>
@@ -565,6 +591,28 @@
 
     <script src="js/config.js"></script>
     <script src="js/admin.js"></script>
+    <script>
+        function toggleAdminSidebar() {
+            const sidebar = document.getElementById('adminSidebar');
+            const overlay = document.getElementById('adminSidebarOverlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('open');
+            document.body.style.overflow = sidebar.classList.contains('open') ? 'hidden' : '';
+        }
+        function closeAdminSidebar() {
+            const sidebar = document.getElementById('adminSidebar');
+            const overlay = document.getElementById('adminSidebarOverlay');
+            sidebar.classList.remove('open');
+            overlay.classList.remove('open');
+            document.body.style.overflow = '';
+        }
+        // Close sidebar on nav item click (mobile UX)
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                if (window.innerWidth <= 768) closeAdminSidebar();
+            });
+        });
+    </script>
 </body>
 
 </html>

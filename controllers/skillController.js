@@ -25,7 +25,7 @@ exports.submitQuiz = async (req, res) => {
 
         // Avoid duplicates
         const skillAlreadyVerified = newSkills.some(s => s.toLowerCase() === skill_name.toLowerCase());
-        
+
         if (!skillAlreadyVerified) {
             newSkills.push(skill_name);
 
@@ -39,7 +39,7 @@ exports.submitQuiz = async (req, res) => {
 
             // NEW: Automatically calculate match ratios for all jobs/internships
             const jobsWithMatches = await getJobsWithMatchRatios(user_id);
-            
+
             // Get top 5 best matches
             const topMatches = jobsWithMatches
                 .filter(job => job.matchInfo.matchPercentage > 0)
@@ -53,7 +53,7 @@ exports.submitQuiz = async (req, res) => {
                     missingSkills: job.matchInfo.missingSkills
                 }));
 
-            return res.json({ 
+            return res.json({
                 message: "Skill Verified Successfully!",
                 verifiedSkill: skill_name,
                 totalVerifiedSkills: newSkills.length,

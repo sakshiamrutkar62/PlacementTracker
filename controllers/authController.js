@@ -114,7 +114,7 @@ exports.forgotPassword = async (req, res, next) => {
 
         await pool.query('UPDATE users SET reset_token = $1, reset_token_expiry = $2 WHERE id = $3', [resetToken, tokenExpiry, user.id]);
 
-        const resetLink = `http://localhost:3000/reset-password.html?token=${resetToken}`;
+        const resetLink = `${process.env.APP_URL || 'http://localhost:3000'}/reset-password.html?token=${resetToken}`;
         await sendEmail(email, 'Password Reset', `Click to reset: ${resetLink}`);
 
         res.json({ message: 'Reset link sent to email.' });

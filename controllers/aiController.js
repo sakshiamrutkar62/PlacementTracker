@@ -19,7 +19,7 @@ async function callGemini(prompt) {
         console.error('[AI ERROR] GEMINI_API_KEY not configured in environment');
         return null;
     }
-    
+
     for (const strategy of STRATEGIES) {
         try {
             const URL = `https://generativelanguage.googleapis.com/${strategy.version}/models/${strategy.model}:generateContent?key=${API_KEY}`;
@@ -33,11 +33,11 @@ async function callGemini(prompt) {
             const data = await response.json();
             if (data.error) { continue; }
             // FIX: Add null checks for nested properties
-            if (data.candidates && 
-                data.candidates[0] && 
-                data.candidates[0].content && 
-                data.candidates[0].content.parts && 
-                data.candidates[0].content.parts[0] && 
+            if (data.candidates &&
+                data.candidates[0] &&
+                data.candidates[0].content &&
+                data.candidates[0].content.parts &&
+                data.candidates[0].content.parts[0] &&
                 data.candidates[0].content.parts[0].text) {
                 return data.candidates[0].content.parts[0].text;
             }

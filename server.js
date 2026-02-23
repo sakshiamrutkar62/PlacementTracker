@@ -30,12 +30,17 @@ app.use(limiter);
 app.use(helmet({ contentSecurityPolicy: false })); // Security headers (CSP disabled to allow inline scripts in public HTML)
 app.use(cors());
 app.use(express.json()); // Parses incoming JSON requests
-app.use(express.static('public')); // Serves your Frontend (HTML/CSS/JS)
+app.use(express.static(path.join(__dirname, 'public'))); // Serves your Frontend (HTML/CSS/JS)
 
 // --- 3. ROUTES (The Brain Upgrade) ---
 // We now use the '/api' prefix for all backend logic.
 // This keeps your API clean: http://localhost:3000/api/auth/login
 app.use('/api', apiRoutes);
+
+// Root route → serve index.html (login page)
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 // Fix for Favicon Error (Stops browser console warnings)
 app.get('/favicon.ico', (req, res) => res.status(204).end());

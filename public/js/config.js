@@ -6,7 +6,7 @@ const API_BASE_URL = window.location.hostname === 'localhost' || window.location
 // Helper function to handle fetch with Auth Token automatically
 async function authenticatedFetch(url, options = {}) {
     const token = localStorage.getItem('token');
-    
+
     const headers = {
         'Content-Type': 'application/json',
         ...options.headers,

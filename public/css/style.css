@@ -47,7 +47,7 @@ body {
     left: 0;
     right: 0;
     z-index: 200;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .mobile-topbar .brand {
@@ -1605,7 +1605,7 @@ tr:hover td {
         gap: 12px;
     }
 
-    .header > div:last-child {
+    .header>div:last-child {
         width: 100%;
     }
 
@@ -1634,11 +1634,11 @@ tr:hover td {
     }
 
     /* --- Profile header buttons: stacked --- */
-    #tab-profile .header > div {
+    #tab-profile .header>div {
         width: 100%;
     }
 
-    #tab-profile .header > div:last-child {
+    #tab-profile .header>div:last-child {
         display: flex;
         gap: 8px;
         flex-wrap: wrap;
@@ -1672,8 +1672,8 @@ tr:hover td {
         align-items: flex-start;
     }
 
-    #tab-applicants .header > div:last-child,
-    #tab-students .header > div:last-child {
+    #tab-applicants .header>div:last-child,
+    #tab-students .header>div:last-child {
         display: flex;
         flex-direction: column;
         gap: 8px;

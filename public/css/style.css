@@ -1526,8 +1526,8 @@ tr:hover td {
         justify-content: center;
     }
 
-    /* Show overlay when sidebar open */
-    .sidebar-overlay {
+    /* Show overlay ONLY when sidebar is open */
+    .sidebar-overlay.open {
         display: block;
     }
 

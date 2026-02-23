@@ -185,7 +185,7 @@ function renderAppsTable(apps) {
                         style="color:var(--primary); margin-right:10px;">
                         <i class="fas fa-file-pdf fa-lg"></i></a>`
                 : `<span style="color:#d1d5db; margin-right:10px;"><i class="fas fa-file-excel fa-lg"></i></span>`}
-                ${app.status === 'Applied' ? `
+                ${(app.status || '').toLowerCase() === 'applied' ? `
                     <button class="action-btn" style="background:#22c55e; color:white;" title="Shortlist"
                         onclick="openStatusModal('${app.id}', 'Shortlisted')">
                         <i class="fas fa-check"></i>
@@ -198,7 +198,7 @@ function renderAppsTable(apps) {
                         onclick="openStatusModal('${app.id}', 'Rejected')">
                         <i class="fas fa-times"></i>
                     </button>
-                ` : app.status === 'Shortlisted' ? `
+                ` : (app.status || '').toLowerCase() === 'shortlisted' ? `
                     <button class="action-btn" style="background:#f97316; color:white;" title="Offer"
                         onclick="openStatusModal('${app.id}', 'Offered')">
                         <i class="fas fa-trophy"></i>
@@ -215,12 +215,12 @@ function renderAppsTable(apps) {
 
 function getStatusStyle(status) {
     const map = {
-        'Applied': { badge: 'badge-applied', icon: 'fa-paper-plane' },
-        'Shortlisted': { badge: 'badge-shortlisted', icon: 'fa-check-circle' },
-        'Offered': { badge: 'badge-offered', icon: 'fa-trophy' },
-        'Rejected': { badge: 'badge-rejected', icon: 'fa-times-circle' }
+        'applied': { badge: 'badge-applied', icon: 'fa-paper-plane' },
+        'shortlisted': { badge: 'badge-shortlisted', icon: 'fa-check-circle' },
+        'offered': { badge: 'badge-offered', icon: 'fa-trophy' },
+        'rejected': { badge: 'badge-rejected', icon: 'fa-times-circle' }
     };
-    return map[status] || { badge: 'badge-applied', icon: 'fa-question-circle' };
+    return map[(status || '').toLowerCase()] || { badge: 'badge-applied', icon: 'fa-question-circle' };
 }
 
 // ---------- 3. UPDATE STATUS ----------
@@ -238,8 +238,8 @@ function openStatusModal(appId, newStatus) {
 
     const styles = {
         Shortlisted: { bg: '#f0fdf4', color: '#166534', border: '#86efac', icon: 'fa-check-circle' },
-        Offered:     { bg: '#fefce8', color: '#92400e', border: '#fde68a', icon: 'fa-trophy' },
-        Rejected:    { bg: '#fef2f2', color: '#991b1b', border: '#fca5a5', icon: 'fa-times-circle' }
+        Offered: { bg: '#fefce8', color: '#92400e', border: '#fde68a', icon: 'fa-trophy' },
+        Rejected: { bg: '#fef2f2', color: '#991b1b', border: '#fca5a5', icon: 'fa-times-circle' }
     };
     const c = styles[newStatus] || { bg: '#eff6ff', color: '#1e40af', border: '#bfdbfe', icon: 'fa-info-circle' };
 
@@ -403,21 +403,21 @@ function renderStudentsTable(students) {
             </td>
             <td style="text-align:center;">
                 ${isVerified
-                    ? `<span class="offer-tag badge-shortlisted"><i class="fas fa-check-circle"></i> Verified</span>`
-                    : `<span class="offer-tag badge-rejected"><i class="fas fa-times-circle"></i> Not Verified</span>`
-                }
+                ? `<span class="offer-tag badge-shortlisted"><i class="fas fa-check-circle"></i> Verified</span>`
+                : `<span class="offer-tag badge-rejected"><i class="fas fa-times-circle"></i> Not Verified</span>`
+            }
             </td>
             <td style="white-space:nowrap;">
                 ${isVerified
-                    ? `<button class="action-btn" style="background:#ef4444;color:white;" title="Revoke Verification"
+                ? `<button class="action-btn" style="background:#ef4444;color:white;" title="Revoke Verification"
                         onclick="toggleCollegeVerify('${s.id}', false)">
                         <i class="fas fa-times"></i>
                        </button>`
-                    : `<button class="action-btn" style="background:#22c55e;color:white;" title="Grant College Verified Badge"
+                : `<button class="action-btn" style="background:#22c55e;color:white;" title="Grant College Verified Badge"
                         onclick="toggleCollegeVerify('${s.id}', true)">
                         <i class="fas fa-check"></i>
                        </button>`
-                }
+            }
             </td>
         </tr>`;
     }).join('');

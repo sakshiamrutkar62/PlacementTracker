@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Placement Tracker</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="css/style.css">
+
+    <style>
+        .hidden { display: none !important; }
+        .error-text { 
+            color: #ef4444; 
+            font-size: 0.9rem; 
+            margin-top: 10px; 
+            text-align: center; 
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="auth-container">
+        
+        <div class="auth-card">
+            
+            <div class="auth-header">
+                <div style="font-size: 3rem; color: var(--primary); margin-bottom: 1rem;">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+                <h1>Placement Cell</h1>
+                <p>Welcome back! Please login to continue.</p>
+            </div>
+
+            <form id="loginForm" style="text-align: left;">
+                
+                <div class="form-group">
+                    <label class="form-label">Email Address</label>
+                    <div style="position: relative;">
+                        <i class="fas fa-envelope" style="position: absolute; left: 15px; top: 14px; color: #94a3b8;"></i>
+                        <input type="email" id="email" class="form-input" placeholder="student@college.edu" style="padding-left: 45px;" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <div style="position: relative;">
+                        <i class="fas fa-lock" style="position: absolute; left: 15px; top: 14px; color: #94a3b8;"></i>
+                        <input type="password" id="password" class="form-input" placeholder="••••••••" style="padding-left: 45px;" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 1rem; font-size: 1rem;">
+                    <span id="btnText">Login</span>
+                    <i id="loader" class="fas fa-circle-notch fa-spin hidden" style="margin-left: 10px;"></i>
+                </button>
+
+                <p id="errorMsg" class="error-text hidden"></p>
+
+            </form>
+
+            <div class="auth-links">
+                <a href="register.html">Create Account</a>
+                <a href="reset-password.html" style="color: #94a3b8;">Forgot Password?</a>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
+</body>
+</html>

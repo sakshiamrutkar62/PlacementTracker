@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel – ECampus Placement</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        .admin-stat-bar {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .admin-stat {
+            background: white;
+            border-radius: 16px;
+            padding: 1.2rem 1.5rem;
+            box-shadow: var(--shadow);
+            border-left: 4px solid var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .admin-stat .asi {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+
+        .admin-stat p {
+            margin: 0;
+            font-size: 0.8rem;
+            color: #64748b;
+        }
+
+        .admin-stat h3 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        [data-theme="dark"] .admin-stat {
+            background: #1e293b;
+        }
+
+        [data-theme="dark"] .admin-stat h3 {
+            color: #f1f5f9;
+        }
+
+        .form-grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        .offer-tag {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .action-btn {
+            width: 32px;
+            height: 32px;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+
+        .action-btn:hover {
+            transform: scale(1.12);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .badge-applied {
+            background: #eff6ff;
+            color: #1e40af;
+        }
+
+        .badge-shortlisted {
+            background: #f0fdf4;
+            color: #166534;
+        }
+
+        .badge-offered {
+            background: #fefce8;
+            color: #92400e;
+        }
+
+        .badge-rejected {
+            background: #fef2f2;
+            color: #991b1b;
+        }
+
+        #toast-admin {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            pointer-events: none;
+        }
+
+        .toast-item {
+            background: white;
+            border-radius: 12px;
+            padding: 12px 18px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            animation: slideIn 0.3s ease;
+            pointer-events: all;
+            min-width: 260px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .toast-success {
+            border-left-color: #22c55e;
+        }
+
+        .toast-error {
+            border-left-color: #ef4444;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            padding: 12px 14px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 2px solid #f1f5f9;
+        }
+
+        td {
+            padding: 12px 14px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+            font-size: 0.9rem;
+        }
+
+        tr:hover td {
+            background: #f8fafc;
+        }
+
+        .sidebar-header-sub {
+            font-size: 0.72rem;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            padding: 0 1.25rem;
+            margin: 8px 0 4px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Toast Container -->
+    <div id="toast-admin"></div>
+
+    <div class="dashboard-container">
+        <!-- ===== SIDEBAR ===== -->
+        <aside class="sidebar">
+            <div class="brand">
+                <i class="fas fa-shield-halved"></i>
+                <span>ECampus <span style="color:var(--primary)">Admin</span></span>
+            </div>
+
+            <div class="sidebar-header-sub">Management</div>
+            <ul class="nav-links">
+                <li class="nav-item active" onclick="switchTab('post-job')">
+                    <i class="fas fa-plus-circle"></i> Post Opportunity
+                </li>
+                <li class="nav-item" onclick="switchTab('students')">
+                    <i class="fas fa-user-graduate"></i> Students
+                    <span class="nav-badge" id="studentBadge">0</span>
+                </li>
+                <li class="nav-item" onclick="switchTab('apply-student')">
+                    <i class="fas fa-file-signature"></i> Apply for Student
+                </li>
+                <li class="nav-item" onclick="switchTab('applicants')">
+                    <i class="fas fa-users"></i> Applicants
+                    <span class="nav-badge" id="totalBadge">0</span>
+                </li>
+                <li class="nav-item" onclick="switchTab('stats')">
+                    <i class="fas fa-chart-bar"></i> Analytics
+                </li>
+            </ul>
+
+            <div class="sidebar-header-sub">Preferences</div>
+            <div class="dark-toggle" onclick="adminToggleDark()">
+                <i class="fas fa-moon" id="darkIcon"></i>
+                <span id="darkLabel">Dark Mode</span>
+            </div>
+
+            <div class="user-profile" style="margin-top:auto;">
+                <div class="user-avatar" style="background:linear-gradient(135deg,#ef4444,#dc2626);">A</div>
+                <div style="margin-left:10px;">
+                    <div style="font-weight:600;">Placement Officer</div>
+                    <div style="font-size:0.8rem; color:#94a3b8; cursor:pointer;" onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- ===== MAIN CONTENT ===== -->
+        <main class="main-content">
+
+            <!-- ========== TAB: POST JOB ========== -->
+            <div id="tab-post-job">
+                <div class="header">
+                    <div>
+                        <h1 style="font-size:1.6rem;">Post New Opportunity</h1>
+                        <p style="color:#64748b; font-size:0.9rem; margin:4px 0 0;">Broadcast jobs & internships to all
+                            students</p>
+                    </div>
+                </div>
+
+                <div class="card" style="max-width:860px; border-top:4px solid var(--primary);">
+                    <form id="postJobForm" autocomplete="off">
+                        <!-- Row 1 -->
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label"><i class="fas fa-building"
+                                        style="margin-right:6px;color:var(--primary)"></i>Company Name *</label>
+                                <input type="text" id="jobCompany" class="form-input" placeholder="e.g. Google"
+                                    required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label"><i class="fas fa-user-tag"
+                                        style="margin-right:6px;color:var(--primary)"></i>Role Title *</label>
+                                <input type="text" id="jobRole" class="form-input" placeholder="e.g. SDE Intern"
+                                    required>
+                            </div>
+                        </div>
+
+                        <!-- Row 2 -->
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label"><i class="fas fa-rupee-sign"
+                                        style="margin-right:6px;color:var(--primary)"></i>Stipend / Package *</label>
+                                <input type="text" id="jobStipend" class="form-input"
+                                    placeholder="e.g. ₹15,000/mo or 12 LPA" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label"><i class="fas fa-clock"
+                                        style="margin-right:6px;color:var(--primary)"></i>Duration *</label>
+                                <input type="text" id="jobDuration" class="form-input"
+                                    placeholder="e.g. 3 months or Full-time" required>
+                            </div>
+                        </div>
+
+                        <!-- Row 3 -->
+                        <div class="form-grid-3">
+                            <div class="form-group">
+                                <label class="form-label"><i class="fas fa-laptop-house"
+                                        style="margin-right:6px;color:var(--primary)"></i>Mode *</label>
+                                <select id="jobMode" class="form-input filter-select" required>
+                                    <option value="">-- Select --</option>
+                                    <option value="Remote">Remote</option>
+                                    <option value="On-site">On-site</option>
+                                    <option value="Hybrid">Hybrid</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label"><i class="fas fa-briefcase"
+                                        style="margin-right:6px;color:var(--primary)"></i>Type *</label>
+                                <select id="jobType" class="form-input filter-select" required>
+                                    <option value="">-- Select --</option>
+                                    <option value="Internship">Internship</option>
+                                    <option value="Full-time">Full-time</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label"><i class="fas fa-map-marker-alt"
+                                        style="margin-right:6px;color:var(--primary)"></i>Location</label>
+                                <input type="text" id="jobLocation" class="form-input" placeholder="e.g. Bangalore">
+                            </div>
+                        </div>
+
+                        <!-- Row 4 -->
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label"><i class="fas fa-code"
+                                        style="margin-right:6px;color:var(--primary)"></i>Required Skills
+                                    (comma-separated)</label>
+                                <input type="text" id="jobSkills" class="form-input"
+                                    placeholder="e.g. Python, React, SQL">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label"><i class="fas fa-calendar-alt"
+                                        style="margin-right:6px;color:var(--primary)"></i>Application Deadline *</label>
+                                <input type="date" id="jobDeadline" class="form-input" required>
+                            </div>
+                        </div>
+
+                        <div style="display:flex; gap:12px; margin-top:8px;">
+                            <button type="submit" class="btn btn-primary"
+                                style="flex:1; justify-content:center; padding:1rem; font-size:0.95rem;">
+                                <i class="fas fa-paper-plane"></i> Publish Opportunity
+                            </button>
+                            <button type="button" class="btn btn-outline"
+                                onclick="document.getElementById('postJobForm').reset()" style="padding:1rem 1.5rem;">
+                                <i class="fas fa-redo"></i> Clear
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- ========== TAB: APPLICANTS ========== -->
+            <div id="tab-applicants" class="hidden">
+                <div class="header">
+                    <div>
+                        <h1 style="font-size:1.6rem;">Student Applications</h1>
+                        <p style="color:#64748b; font-size:0.9rem; margin:4px 0 0;" id="appSubtitle">Loading...</p>
+                    </div>
+                    <div style="display:flex; gap:10px;">
+                        <input type="text" id="adminSearch" class="form-input search-input"
+                            style="width:220px; padding:10px 14px;" placeholder="🔍 Search student / role...">
+                        <select id="adminStatusFilter" class="filter-select" onchange="filterAdminApps()">
+                            <option value="">All Statuses</option>
+                            <option value="Applied">Applied</option>
+                            <option value="Shortlisted">Shortlisted</option>
+                            <option value="Offered">Offered</option>
+                            <option value="Rejected">Rejected</option>
+                        </select>
+                        <button class="btn btn-outline" onclick="loadAllApplications()">
+                            <i class="fas fa-sync"></i> Refresh
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Student</th>
+                                <th>Company</th>
+                                <th>Role</th>
+                                <th>Applied On</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminAppList">
+                            <tr>
+                                <td colspan="7" style="text-align:center; padding:3rem; color:#94a3b8;">
+                                    <i class="fas fa-spinner fa-spin fa-2x"></i>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ========== TAB: STUDENTS ========== -->
+            <div id="tab-students" class="hidden">
+                <div class="header">
+                    <div>
+                        <h1 style="font-size:1.6rem;">Student Management</h1>
+                        <p style="color:#64748b; font-size:0.9rem; margin:4px 0 0;" id="studentSubtitle">Grant or revoke
+                            the College Verified badge for students</p>
+                    </div>
+                    <div style="display:flex; gap:10px;">
+                        <input type="text" id="studentSearch" class="form-input search-input"
+                            style="width:220px; padding:10px 14px;" placeholder="🔍 Search by name/email...">
+                        <button class="btn btn-outline" onclick="loadStudents()">
+                            <i class="fas fa-sync"></i> Refresh
+                        </button>
+                    </div>
+                </div>
+                <div class="card">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Student</th>
+                                <th>Email</th>
+                                <th>Batch</th>
+                                <th>Verified Skills</th>
+                                <th>College Badge</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentList">
+                            <tr>
+                                <td colspan="7" style="text-align:center;padding:3rem;color:#94a3b8;">
+                                    <i class="fas fa-spinner fa-spin fa-2x"></i>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ========== TAB: APPLY FOR STUDENT ========== -->
+            <div id="tab-apply-student" class="hidden">
+                <div class="header">
+                    <div>
+                        <h1 style="font-size:1.6rem;">Apply for Student</h1>
+                        <p style="color:#64748b; font-size:0.9rem; margin:4px 0 0;">Manually register a student's
+                            application for an internship or job</p>
+                    </div>
+                </div>
+                <div class="card" style="max-width:660px; border-top:4px solid #7c3aed;">
+                    <form id="adminApplyForm" autocomplete="off">
+                        <div class="form-group">
+                            <label class="form-label"><i class="fas fa-user-graduate"
+                                    style="margin-right:6px;color:var(--primary)"></i>Select Student *</label>
+                            <select id="applyStudentSelect" class="form-input filter-select" required>
+                                <option value="">-- Loading students... --</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label"><i class="fas fa-briefcase"
+                                    style="margin-right:6px;color:var(--primary)"></i>Select Internship / Job *</label>
+                            <select id="applyInternshipSelect" class="form-input filter-select" required>
+                                <option value="">-- Loading opportunities... --</option>
+                            </select>
+                        </div>
+                        <div style="display:flex; gap:12px; margin-top:8px;">
+                            <button type="submit" class="btn btn-primary"
+                                style="flex:1; justify-content:center; padding:1rem; font-size:0.95rem;">
+                                <i class="fas fa-file-signature"></i> Submit Application
+                            </button>
+                            <button type="button" class="btn btn-outline"
+                                onclick="document.getElementById('adminApplyForm').reset()"
+                                style="padding:1rem 1.5rem;">
+                                <i class="fas fa-redo"></i> Clear
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- ========== TAB: ANALYTICS ========== -->
+            <div id="tab-stats" class="hidden">
+                <div class="header">
+                    <h1 style="font-size:1.6rem;">Analytics Overview</h1>
+                </div>
+                <div class="admin-stat-bar" id="analyticsCards">
+                    <div class="admin-stat">
+                        <div class="asi" style="background:#eff6ff; color:#1e40af;"><i class="fas fa-users"></i></div>
+                        <div>
+                            <p>Total Applications</p>
+                            <h3 id="sTotal">—</h3>
+                        </div>
+                    </div>
+                    <div class="admin-stat">
+                        <div class="asi" style="background:#f0fdf4; color:#166534;"><i class="fas fa-check-circle"></i>
+                        </div>
+                        <div>
+                            <p>Shortlisted</p>
+                            <h3 id="sShortlisted">—</h3>
+                        </div>
+                    </div>
+                    <div class="admin-stat">
+                        <div class="asi" style="background:#fefce8; color:#92400e;"><i class="fas fa-trophy"></i></div>
+                        <div>
+                            <p>Offered</p>
+                            <h3 id="sOffered">—</h3>
+                        </div>
+                    </div>
+                    <div class="admin-stat">
+                        <div class="asi" style="background:#fef2f2; color:#991b1b;"><i class="fas fa-times-circle"></i>
+                        </div>
+                        <div>
+                            <p>Rejected</p>
+                            <h3 id="sRejected">—</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="card" style="margin-top:0;">
+                    <h3 style="margin-bottom:16px; font-size:1rem; color:#64748b;">
+                        <i class="fas fa-chart-pie" style="margin-right:8px;"></i>Status Breakdown
+                    </h3>
+                    <div id="statusBreakdown" style="display:flex; gap:10px; flex-wrap:wrap;"></div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- ===== STATUS REASON MODAL ===== -->
+    <div id="statusReasonModal" class="hidden" style="
+        position:fixed; inset:0; background:rgba(15,23,42,0.55); backdrop-filter:blur(4px);
+        display:flex; align-items:center; justify-content:center; z-index:9000;
+        animation:fadeIn 0.2s ease;">
+        <div style="
+            background:var(--card-bg,#fff); border-radius:20px;
+            padding:2rem 2.2rem; width:100%; max-width:460px;
+            box-shadow:0 20px 60px rgba(0,0,0,0.25); position:relative;">
+
+            <!-- Close -->
+            <button onclick="closeStatusModal()" style="
+                position:absolute; top:14px; right:16px;
+                background:none; border:none; font-size:1.3rem; cursor:pointer;
+                color:#94a3b8; line-height:1;">&#x2715;</button>
+
+            <!-- Icon + Title -->
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom:1rem;">
+                <div style="width:42px; height:42px; border-radius:12px; background:#eff6ff;
+                    display:flex; align-items:center; justify-content:center; color:#1e40af; font-size:1.1rem;">
+                    <i class="fas fa-comment-alt"></i>
+                </div>
+                <div>
+                    <h3 id="statusModalTitle" style="margin:0; font-size:1.05rem; font-weight:700; color:#1e293b;">
+                        Change Status</h3>
+                    <span id="statusModalBadge"></span>
+                </div>
+            </div>
+
+            <p style="color:#64748b; font-size:0.88rem; margin:0 0 12px;">
+                Optionally provide a reason — the student will see this message.
+            </p>
+
+            <textarea id="statusReasonText" rows="3" placeholder="e.g. Strong technical skills, invited for next round…"
+                style="width:100%; box-sizing:border-box; border:1.5px solid #e2e8f0; border-radius:10px;
+                    padding:10px 14px; font-size:0.9rem; font-family:inherit; resize:vertical;
+                    color:#1e293b; outline:none; transition:border 0.2s;"
+                onfocus="this.style.borderColor='var(--primary)'" onblur="this.style.borderColor='#e2e8f0'"></textarea>
+
+            <div style="display:flex; gap:10px; margin-top:14px;">
+                <button onclick="closeStatusModal()" class="btn btn-outline" style="flex:1; justify-content:center;">
+                    Cancel
+                </button>
+                <button onclick="confirmStatusUpdate()" class="btn btn-primary" style="flex:2; justify-content:center;">
+                    <i class="fas fa-check"></i> Confirm Update
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+
+</html>

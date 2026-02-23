@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ECampus - Student Dashboard</title>
+
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+
+<body>
+    <!-- ====== TOAST CONTAINER ====== -->
+    <div id="toastContainer"
+        style="position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:10px;pointer-events:none;">
+    </div>
+
+    <div class="dashboard-container">
+
+        <!-- ====== SIDEBAR ====== -->
+        <aside class="sidebar">
+            <div class="brand">
+                <i class="fas fa-graduation-cap"></i>
+                <span>ECampus</span>
+            </div>
+
+            <ul class="nav-links">
+                <li class="nav-item active" id="nav-jobs" onclick="switchTab('jobs')">
+                    <i class="fas fa-briefcase"></i> Opportunities
+                </li>
+                <li class="nav-item" id="nav-bookmarks" onclick="switchTab('bookmarks')">
+                    <i class="fas fa-bookmark"></i> Saved Jobs
+                    <span id="bookmarkBadge" class="nav-badge hidden">0</span>
+                </li>
+                <li class="nav-item" id="nav-applications" onclick="switchTab('applications')">
+                    <i class="fas fa-file-alt"></i> Applications
+                    <span id="appBadge" class="nav-badge" style="background:#ef4444; display:none;">0</span>
+                </li>
+                <li class="nav-item" id="nav-profile" onclick="switchTab('profile')">
+                    <i class="fas fa-id-badge"></i> My Profile
+                </li>
+            </ul>
+
+            <!-- Dark Mode Toggle -->
+            <div class="dark-toggle" onclick="toggleDarkMode()" title="Toggle Dark Mode">
+                <i class="fas fa-moon" id="darkModeIcon"></i>
+                <span id="darkModeLabel">Dark Mode</span>
+            </div>
+
+            <div class="user-profile">
+                <div class="user-avatar" id="avatar">U</div>
+                <div style="margin-left:10px; overflow:hidden; flex:1;">
+                    <div style="font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"
+                        id="userName">Student</div>
+                    <div style="font-size:0.8rem; color:#6b7280; cursor:pointer;" onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- ====== MAIN CONTENT ====== -->
+        <main class="main-content">
+
+            <!-- ========== JOBS TAB ========== -->
+            <div id="tab-jobs">
+                <div class="header"
+                    style="flex-direction:column; align-items:flex-start; gap:12px; margin-bottom:1.5rem;">
+                    <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
+                        <h1 style="font-size:1.6rem;">Active Opportunities</h1>
+                        <button class="btn btn-outline" style="padding:8px 16px; font-size:0.85rem;"
+                            onclick="loadJobs()">
+                            <i class="fas fa-sync"></i> Refresh
+                        </button>
+                    </div>
+
+                    <!-- Search + Filters -->
+                    <div class="search-bar-container">
+                        <div style="position:relative; flex:1; min-width:200px;">
+                            <i class="fas fa-search"
+                                style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#94a3b8;"></i>
+                            <input type="text" id="searchInput" class="search-input"
+                                placeholder="Search by role, company, or skill... (Press / to focus)"
+                                oninput="debounceSearch()" />
+                        </div>
+                        <div class="filter-chips">
+                            <select id="modeFilter" class="filter-select" onchange="applyFilters()">
+                                <option value="all">All Modes</option>
+                                <option value="Remote">Remote</option>
+                                <option value="Hybrid">Hybrid</option>
+                                <option value="On-site">On-site</option>
+                            </select>
+                            <select id="matchFilter" class="filter-select" onchange="applyFilters()">
+                                <option value="all">All Jobs</option>
+                                <option value="match">Perfect Match</option>
+                                <option value="saved">Saved Only</option>
+                            </select>
+                            <select id="skillCoverageFilter" class="filter-select" onchange="applyFilters()">
+                                <option value="all">All Skill Records</option>
+                                <option value="verified">Verified Skills Fit</option>
+                                <option value="unverified">Needs Unverified Skills</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Type Toggle -->
+                    <div style="display:flex; align-items:center; gap:12px; width:100%; flex-wrap:wrap;">
+                        <div class="toggle-container">
+                            <button id="btnAll" onclick="setJobType('All')" class="toggle-btn active-toggle">
+                                <i class="fas fa-layer-group"></i> All
+                            </button>
+                            <button id="btnInternship" onclick="setJobType('Internship')"
+                                class="toggle-btn inactive-toggle">
+                                <i class="fas fa-user-graduate"></i> Internships
+                            </button>
+                            <button id="btnJob" onclick="setJobType('Job')" class="toggle-btn inactive-toggle">
+                                <i class="fas fa-briefcase"></i> Full-time
+                            </button>
+                        </div>
+                        <span id="jobCount" style="color:#64748b; font-size:0.85rem; margin-left:auto;"></span>
+                    </div>
+                </div>
+
+                <div class="jobs-grid" id="jobsList">
+                    <div class="loading-state">
+                        <i class="fas fa-circle-notch fa-spin" style="font-size:2.5rem; color:var(--primary);"></i>
+                        <p>Fetching opportunities...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========== BOOKMARKS TAB ========== -->
+            <div id="tab-bookmarks" class="hidden">
+                <div class="header">
+                    <h1>Saved Jobs</h1>
+                    <button class="btn btn-outline" style="padding:8px 16px; font-size:0.85rem;"
+                        onclick="clearBookmarks()">
+                        <i class="fas fa-trash"></i> Clear All
+                    </button>
+                </div>
+                <div class="jobs-grid" id="bookmarksList">
+                    <div class="empty-state">
+                        <i class="fas fa-bookmark" style="font-size:3rem; color:#cbd5e1;"></i>
+                        <p>No saved jobs yet.<br>Click the bookmark icon on any job card.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========== APPLICATIONS TAB ========== -->
+            <div id="tab-applications" class="hidden">
+                <div class="header">
+                    <h1>My Applications</h1>
+                    <button class="btn btn-outline" style="padding:8px 16px; font-size:0.85rem;"
+                        onclick="loadApplications()">
+                        <i class="fas fa-sync"></i> Refresh
+                    </button>
+                </div>
+
+                <!-- Stats Row  -->
+                <div class="stats-container" style="margin-bottom:2rem;">
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background:#e0e7ff;color:var(--primary);"><i
+                                class="fas fa-paper-plane"></i></div>
+                        <div>
+                            <div class="stat-number counter" id="statApplied">0</div>
+                            <div class="stat-label">Applied</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background:#fef3c7;color:#d97706;"><i class="fas fa-star"></i>
+                        </div>
+                        <div>
+                            <div class="stat-number counter" id="statShortlisted" style="color:#d97706;">0</div>
+                            <div class="stat-label">Shortlisted</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background:#dcfce7;color:#16a34a;"><i
+                                class="fas fa-handshake"></i></div>
+                        <div>
+                            <div class="stat-number counter" id="statOffered" style="color:#16a34a;">0</div>
+                            <div class="stat-label">Offered</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon" style="background:#f3e8ff;color:#7c3aed;"><i
+                                class="fas fa-shield-halved"></i></div>
+                        <div>
+                            <div class="stat-number counter" id="statVerified" style="color:#7c3aed;">0</div>
+                            <div class="stat-label">Verified Skills</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" style="overflow-x:auto; padding:0;">
+                    <table style="width:100%; border-collapse:collapse; min-width:500px;">
+                        <thead>
+                            <tr style="text-align:left; border-bottom:2px solid #f3f4f6; background:#f8fafc;">
+                                <th
+                                    style="padding:14px 16px; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; color:#64748b;">
+                                    Company</th>
+                                <th
+                                    style="padding:14px 16px; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; color:#64748b;">
+                                    Role</th>
+                                <th
+                                    style="padding:14px 16px; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; color:#64748b;">
+                                    Status</th>
+                                <th
+                                    style="padding:14px 16px; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; color:#64748b;">
+                                    Reason</th>
+                                <th
+                                    style="padding:14px 16px; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; color:#64748b;">
+                                    Date</th>
+                                <th
+                                    style="padding:14px 16px; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; color:#64748b;">
+                                    Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="applicationsList"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ========== PROFILE TAB ========== -->
+            <div id="tab-profile" class="hidden">
+
+                <div class="header" style="justify-content:space-between; flex-wrap:wrap; gap:10px;">
+                    <h1>My Official Profile</h1>
+                    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                        <button onclick="downloadProfile()" class="btn btn-outline">
+                            <i class="fas fa-id-card"></i> Placement Profile
+                        </button>
+                        <button onclick="openSkillGapAnalysis()" class="btn btn-primary"
+                            style="background:linear-gradient(135deg,#7c3aed,#4f46e5);">
+                            <i class="fas fa-chart-line"></i> AI Gap Analysis
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Profile Completion Bar -->
+                <div class="card" style="margin-bottom:1.5rem; padding:1.5rem;">
+                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+                        <span style="font-weight:600; color:#1e293b;"><i class="fas fa-chart-bar"
+                                style="color:var(--primary); margin-right:8px;"></i>Profile Strength</span>
+                        <span id="profileScoreLabel"
+                            style="font-weight:700; color:var(--primary); font-size:1.1rem;">0%</span>
+                    </div>
+                    <div class="progress-bar-track">
+                        <div class="progress-bar-fill" id="profileScoreBar" style="width:0%;"></div>
+                    </div>
+                    <p id="profileScoreHint" style="font-size:0.8rem; color:#64748b; margin-top:8px;">Upload your resume
+                        to boost your profile score.</p>
+                </div>
+
+                <!-- Printable Profile -->
+                <div id="printable-profile" class="card profile-card"
+                    style="margin-bottom:2rem; border:1px solid #e2e8f0; position:relative; overflow:hidden;">
+                    <div
+                        style="position:absolute; top:-10px; right:-10px; opacity:0.04; font-size:8rem; color:var(--primary); pointer-events:none;">
+                        <i class="fas fa-university"></i>
+                    </div>
+
+                    <div class="profile-header"
+                        style="text-align:center; margin-bottom:2rem; padding-bottom:2rem; border-bottom:1px dashed #e2e8f0;">
+                        <div class="profile-avatar">
+                            <span id="profileInitials">ST</span>
+                        </div>
+                        <h2 id="profileName" style="margin-top:1rem; color:var(--dark); font-size:1.4rem;">Student Name
+                        </h2>
+                        <p id="profileEmail" style="color:#64748b; margin-bottom:12px;">student@college.edu</p>
+                        <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
+                            <span id="collegeVerifiedBadge" class="tag"
+                                style="background:#e0e7ff; color:#4338ca; border:1px solid #c7d2fe; padding:5px 14px; display:none;">
+                                <i class="fas fa-check-circle"></i> College Verified
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="profile-section">
+                        <h3 style="margin-bottom:1rem; color:var(--dark); display:flex; align-items:center; gap:10px;">
+                            <i class="fas fa-layer-group" style="color:var(--primary);"></i> Skill Competency
+                        </h3>
+                        <p style="font-size:0.85rem; color:#64748b; margin-bottom:1.5rem;">
+                            Skills with <span
+                                style="background:linear-gradient(135deg,#fef3c7,#fde68a); color:#b45309; padding:2px 8px; border-radius:4px; border:1px solid #fcd34d; font-weight:600;">Gold
+                                Badge</span> are AI-verified.
+                        </p>
+                        <div id="skills-container" style="display:flex; flex-wrap:wrap; gap:10px;">
+                            <p style="color:#94a3b8; font-style:italic;">Upload a resume to extract your skills.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resume Upload -->
+                <div class="resume-section" id="resumeDropZone"
+                    ondragover="event.preventDefault(); this.classList.add('drag-over')"
+                    ondragleave="this.classList.remove('drag-over')" ondrop="handleResumeDrop(event)">
+                    <i class="fas fa-cloud-upload-alt resume-icon"></i>
+                    <div class="resume-label">Update Your Resume</div>
+                    <div class="resume-subtext">Drag & drop or click to select a PDF</div>
+                    <input type="file" id="resumeInput" accept=".pdf" onchange="uploadResume()">
+                    <label for="resumeInput" class="upload-btn-label">
+                        <i class="fas fa-folder-open" style="margin-right:8px;"></i> Select PDF
+                    </label>
+                    <div id="uploadStatus" class="hidden" style="margin-top:1.5rem;"></div>
+                </div>
+
+            </div>
+
+        </main>
+    </div>
+
+    <!-- ====== QUIZ MODAL ====== -->
+    <div id="quizModal" class="modal hidden">
+        <div class="modal-content glass-card">
+            <div class="modal-header"
+                style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                <h2 style="color:var(--primary); display:flex; align-items:center; gap:8px; font-size:1.2rem;">
+                    <i class="fas fa-brain"></i> AI Skill Assessment
+                </h2>
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <div id="quizTimerBadge" class="quiz-timer-badge hidden">
+                        <i class="fas fa-clock"></i> <span id="timerDisplay">5:00</span>
+                    </div>
+                    <button onclick="closeModal()" class="close-btn"><i class="fas fa-times"></i></button>
+                </div>
+            </div>
+
+            <div id="quizBody">
+                <!-- Loading state -->
+                <div id="quizLoading" class="hidden" style="text-align:center; padding:3rem;">
+                    <i class="fas fa-brain fa-spin"
+                        style="font-size:3rem; color:var(--primary); margin-bottom:1rem;"></i>
+                    <h3 style="color:#1e293b;">AI Generating Your Exam...</h3>
+                    <p style="color:#64748b;">Creating 5 unique questions just for you.</p>
+                    <div style="margin-top:1rem; height:4px; background:#e2e8f0; border-radius:2px; overflow:hidden;">
+                        <div
+                            style="height:100%; background:linear-gradient(90deg, var(--primary), #7c3aed); animation:loadingBar 2s infinite;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quiz Questions -->
+                <div id="quizQuestions" class="hidden">
+                    <div
+                        style="background:#f8fafc; padding:10px 15px; border-radius:8px; margin-bottom:1.5rem; border-left:4px solid var(--primary);">
+                        <h3 id="quizSkillTitle" style="font-size:1rem; color:var(--dark); margin:0;"></h3>
+                        <p style="font-size:0.75rem; color:#64748b; margin:4px 0 0;">Score 4/5 or above to earn a
+                            Verified Gold Badge</p>
+                    </div>
+                    <div style="height:4px; background:#e2e8f0; border-radius:2px; margin-bottom:1.5rem;">
+                        <div id="quizProgressFill"
+                            style="height:100%; background:var(--primary); border-radius:2px; width:0%; transition:width 0.3s;">
+                        </div>
+                    </div>
+                    <form id="quizForm"></form>
+                    <button onclick="submitQuiz()" class="btn btn-primary"
+                        style="width:100%; margin-top:1.5rem; justify-content:center; padding:14px;">
+                        Submit Answers <i class="fas fa-paper-plane" style="margin-left:8px;"></i>
+                    </button>
+                </div>
+
+                <!-- Result -->
+                <div id="quizResult" class="hidden" style="text-align:center; padding:1.5rem;">
+                    <i id="resultIcon" class="fas fa-trophy" style="font-size:4rem; margin-bottom:1rem;"></i>
+                    <h3 id="resultTitle" style="font-size:1.4rem; margin-bottom:0.5rem;"></h3>
+                    <p id="resultMessage" style="color:#64748b; margin-bottom:1.2rem;"></p>
+
+                    <!-- AI Feedback Box -->
+                    <div id="aiFeedbackBox" class="hidden"
+                        style="background:#f8fafc; border-radius:12px; padding:1rem; margin-bottom:1.2rem; text-align:left; border:1px solid #e2e8f0;">
+                        <p style="font-weight:600; color:#1e293b; margin-bottom:6px; font-size:0.9rem;">
+                            <i class="fas fa-robot" style="color:var(--primary);"></i> AI Coach Says:
+                        </p>
+                        <p id="aiFeedbackText" style="color:#475569; font-size:0.85rem; line-height:1.7;"></p>
+                    </div>
+
+                    <!-- Study Resources (fail only) -->
+                    <div id="studyResourcesBox" class="hidden"
+                        style="background:#fffbeb; border-radius:12px; padding:1rem; margin-bottom:1.2rem; border:1px solid #fcd34d; text-align:left;">
+                        <p style="font-weight:600; color:#b45309; margin-bottom:8px; font-size:0.9rem;">
+                            <i class="fas fa-book-open"></i> Free Study Resources
+                        </p>
+                        <div id="studyResourcesList"></div>
+                    </div>
+
+                    <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+                        <button onclick="retryCurrentSkill()" class="btn btn-outline" id="retryBtn"
+                            style="display:none;">
+                            <i class="fas fa-redo"></i> Retry (Wait 24h)
+                        </button>
+                        <button onclick="closeModal()" class="btn btn-primary">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== SKILL GAP MODAL ====== -->
+    <div id="skillGapModal" class="modal hidden">
+        <div class="modal-content" style="max-width:700px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+                <h2 style="color:var(--primary); display:flex; align-items:center; gap:8px; font-size:1.2rem;">
+                    <i class="fas fa-chart-line"></i> AI Skill Gap Analysis
+                </h2>
+                <button onclick="document.getElementById('skillGapModal').classList.add('hidden')" class="close-btn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="skillGapContent">
+                <p style="color:#64748b; margin-bottom:1rem;">Choose a job to get a personalized 30-day learning plan:
+                </p>
+                <select id="gapJobSelect" class="form-input" style="margin-bottom:1rem;">
+                    <option value="">-- Select an Opportunity --</option>
+                </select>
+                <button onclick="runSkillGap()" class="btn btn-primary"
+                    style="width:100%; justify-content:center; padding:12px;">
+                    <i class="fas fa-magic"></i> Generate Learning Plan
+                </button>
+                <div id="gapResult" class="hidden" style="margin-top:1.5rem;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/dashboard.js"></script>
+</body>
+
+</html>

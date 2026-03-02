@@ -1041,7 +1041,7 @@ async function saveVerification(score, passed) {
                 resultDiv.innerHTML = existingContent + matchMessage;
             }
 
-            showToast(`🎯 Found ${matchInfo.goodMatches || 0} great matches after verifying ${skill}!`, 'success', 8000);
+            showToast(`Found ${matchInfo.goodMatches || 0} great matches after verifying ${skill}!`, 'success', 8000);
         }
 
         // Refresh jobs to show updated match ratios
@@ -1296,7 +1296,7 @@ async function downloadProfile() {
       <div class="badges">
         <span class="badge-pill">✓ Platform Verified</span>
         ${verifiedSkills.length > 0 ? `<span class="badge-pill">★ ${verifiedSkills.length} AI-Certified Skill${verifiedSkills.length > 1 ? 's' : ''}</span>` : ''}
-        ${u.resume_link ? '<span class="badge-pill">📄 Resume Uploaded</span>' : ''}
+        ${u.resume_link ? '<span class="badge-pill">Resume Uploaded</span>' : ''}
       </div>
     </div>
     <div class="score-block">
@@ -1310,7 +1310,7 @@ async function downloadProfile() {
 
   <!-- PERSONAL INFORMATION -->
   <div class="section">
-    <div class="sec-title"><span>👤</span> Personal &amp; Academic Information</div>
+    <div class="sec-title"><span>Person</span> Personal &amp; Academic Information</div>
     <div class="info-grid">
       <div class="info-row"><span class="info-key">Full Name</span><span class="info-val">${name}</span></div>
       <div class="info-row"><span class="info-key">Email Address</span><span class="info-val">${email}</span></div>
@@ -1325,7 +1325,7 @@ async function downloadProfile() {
 
   <!-- PLACEMENT STATISTICS -->
   <div class="section">
-    <div class="sec-title"><span>📊</span> Placement Activity Summary</div>
+    <div class="sec-title"><span>Stats</span> Placement Activity Summary</div>
     <div class="stat-row">
       <div class="stat-box" style="background:#eff6ff;border-color:#bfdbfe;">
         <div class="stat-num" style="color:#1d4ed8;">${stats.total}</div>
@@ -1352,7 +1352,7 @@ async function downloadProfile() {
 
   <!-- PROFILE STRENGTH -->
   <div class="section">
-    <div class="sec-title"><span>📈</span> Profile Strength Breakdown</div>
+    <div class="sec-title"><span>Analysis</span> Profile Strength Breakdown</div>
     <div class="bar-row">
       <div class="bar-label"><span>Resume Uploaded</span><span>${u.resume_link ? '30/30 pts' : '0/30 pts'}</span></div>
       <div class="bar-track"><div class="bar-fill" style="width:${u.resume_link ? 100 : 0}%;background:#16a34a;"></div></div>
@@ -1385,7 +1385,7 @@ async function downloadProfile() {
 
   <!-- ALL SKILLS -->
   <div class="section">
-    <div class="sec-title"><span>🛠</span> Technical Skills (Resume-Extracted)</div>
+    <div class="sec-title"><span>Skills</span> Technical Skills (Resume-Extracted)</div>
     ${allSkills.length > 0
             ? `<div>${renderSkillRow(allSkills.filter(s => !verifiedSkills.some(v => v.toLowerCase() === s.toLowerCase())))}</div>
            ${verifiedSkills.length > 0 ? `<p style="font-size:9px;color:#64748b;margin-top:6px;">Note: AI-verified skills shown in the section above are excluded here.</p>` : ''}`
@@ -1394,7 +1394,7 @@ async function downloadProfile() {
 
   <!-- SIGNATURE -->
   <div class="section">
-    <div class="sec-title"><span>✍</span> Certification &amp; Signatures</div>
+    <div class="sec-title"><span>Certification</span> Certification &amp; Signatures</div>
     <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;font-size:9.5px;color:#475569;line-height:1.6;margin-bottom:12px;">
       This document certifies that <strong>${name}</strong> is a registered student on the ECampus Smart Digital Campus Platform. 
       The skill competency ratings herein are generated based on AI-assisted assessments conducted on the platform. 
@@ -1436,7 +1436,7 @@ async function downloadProfile() {
         // Pass HTML string directly — html2pdf renders it in its own iframe,
         // which guarantees layout is complete and nothing is off-screen.
         await html2pdf().set(opt).from(html, 'string').save();
-        showToast('✅ Placement Profile downloaded!', 'success', 4000);
+        showToast('Placement Profile downloaded successfully!', 'success', 4000);
     } catch (err) {
         console.error('PDF error:', err);
         showToast('PDF generation failed. Please try again.', 'error');

@@ -4,7 +4,7 @@ require('dotenv').config();
 const API_KEY = process.env.GEMINI_API_KEY;
 const url = `https://generativelanguage.googleapis.com/v1beta/models?key=${API_KEY}`;
 
-console.log("🔍 Asking Google for your available models...");
+console.log("[INFO] Requesting available models from Google AI...");
 
 https.get(url, (res) => {
     let data = '';
@@ -17,7 +17,7 @@ https.get(url, (res) => {
             if (json.error) {
                 console.error("❌ API Error:", json.error.message);
             } else if (json.models) {
-                console.log("\n✅ SUCCESS! Here are the models you can use:");
+                console.log("\n[SUCCESS] Available models:");
                 console.log("------------------------------------------------");
                 json.models.forEach(m => {
                     // We only care about models that support 'generateContent'
@@ -28,7 +28,7 @@ https.get(url, (res) => {
                     }
                 });
             } else {
-                console.log("⚠️ No models found. This usually means the API Service is enabled but needs 5-10 mins to propagate.");
+                console.log("[WARNING] No models found. API Service may need 5-10 minutes to propagate.");
             }
         } catch (e) {
             console.error("Parse Error:", e.message);

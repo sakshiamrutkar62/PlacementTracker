@@ -488,7 +488,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
                 const data = await res.json();
                 if (res.ok) {
-                    toast('✅ Application created successfully!', 'success');
+                    toast('Application created successfully!', 'success');
                     applyForm.reset();
                 } else {
                     toast('Error: ' + (data.message || data.error || 'Failed'), 'error');

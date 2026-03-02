@@ -6,7 +6,7 @@
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Status](https://img.shields.io/badge/Status-Production%20Ready-success.svg)]()
 
-> An AI-powered platform connecting students with their dream careers through intelligent resume parsing and automated job matching.
+> An AI-powered platform connecting students with their dream careers through intelligent resume parsing and automated Internship/Job matching.
 
 ---
 
@@ -29,15 +29,15 @@
 
 The Smart Student Placement Manager is an enterprise-grade web application designed to streamline the campus recruitment process. It serves as a comprehensive platform for:
 
-- **Students**: Resume management, job discovery, and application tracking
-- **Placement Officers**: Job posting, applicant management, and candidate evaluation
+- **Students**: Resume management, Internship/Job discovery, and application tracking
+- **Placement Officers**: Internship/Job posting, applicant management, and candidate evaluation
 - **AI Integration**: Automated skill extraction from resumes using advanced parsing algorithms
 
 ### Key Capabilities
 
 - Automated resume parsing with AI-powered skill extraction
 - Real-time application status tracking
-- Intelligent job matching based on candidate skills
+- Intelligent Internship/Job matching based on candidate skills
 - Secure authentication with JWT tokens
 - Cloud-based resume storage with Supabase
 - Role-based access control for students and administrators
@@ -50,13 +50,13 @@ The Smart Student Placement Manager is an enterprise-grade web application desig
 
 - **Secure Authentication**: Create accounts and log in with encrypted credentials
 - **AI Resume Parser**: Upload PDF resumes for automatic skill extraction using advanced parsing algorithms
-- **Job Discovery**: Browse comprehensive listings with salary ranges, requirements, and company details
+- **Internship/Job Discovery**: Browse comprehensive listings with salary ranges, requirements, and company details
 - **One-Click Applications**: Apply to positions instantly with pre-filled profile information
 - **Real-Time Tracking**: Monitor application status (Applied, Shortlisted, Rejected) with live updates
 
 ### For Placement Officers
 
-- **Job Management**: Post new opportunities with detailed requirements and deadlines
+- **Internship/Job Management**: Post new opportunities with detailed requirements and deadlines
 - **Applicant Dashboard**: View organized lists of candidates for each position
 - **Candidate Evaluation**: Shortlist or reject applicants with streamlined decision workflows
 - **Resume Access**: Instant access to candidate resumes and verified skill profiles
@@ -598,7 +598,7 @@ The application follows a three-tier architecture:
 
 **Internships Table**
 
-- Job/internship postings
+- Internship/Job/internship postings
 - Required skills stored as array
 - Deadline tracking
 

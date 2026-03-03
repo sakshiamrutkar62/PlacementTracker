@@ -51,8 +51,7 @@ router.get('/stats/dashboard', authMiddleware, applicationController.getDashboar
 
 // --- PROFILE ROUTES ---
 router.get('/profile/me', authMiddleware, profileController.getProfile);
-// DEPRECATED: Resume upload is optional - skills are now verified through AI quizzes
-// router.post('/profile/upload-resume', authMiddleware, upload.single('resume'), profileController.uploadResume);
+router.post('/profile/upload-resume', authMiddleware, upload.single('resume'), profileController.uploadResume);
 
 // --- AI ROUTES ---
 router.post('/ai/quiz', aiController.generateQuiz);

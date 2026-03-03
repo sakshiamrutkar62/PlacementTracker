@@ -667,16 +667,7 @@ function renderSkills(allSkills, verifiedSkills) {
     const container = document.getElementById('skills-container');
     if (!container) return;
     if (!Array.isArray(allSkills) || allSkills.length === 0) {
-        container.innerHTML = `
-            <div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;padding:16px;text-align:center;">
-                <i class="fas fa-lightbulb" style="font-size:2rem;color:#0ea5e9;margin-bottom:8px;"></i>
-                <p style="color:#0c4a6e;font-weight:600;margin-bottom:4px;">Verify Your Skills to Get Matched!</p>
-                <p style="color:#64748b;font-size:0.9rem;">Add skills manually and verify them through AI quizzes. Each verified skill automatically matches you with relevant job opportunities.</p>
-                <button onclick="prompt('Enter a skill name:', 'JavaScript')" class="btn btn-primary" style="margin-top:12px;">
-                    <i class="fas fa-plus"></i> Add Skill
-                </button>
-            </div>
-        `;
+        container.innerHTML = '';
         return;
     }
     container.innerHTML = '';

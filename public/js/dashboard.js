@@ -661,12 +661,6 @@ function _renderProfileUI() {
     }
 
     renderSkills(toArr(currentUser.skills), toArr(currentUser.verified_skills));
-
-    // Hide resume upload section - skills are now verified through AI quizzes
-    const resumeSection = document.getElementById('resumeDropZone');
-    if (resumeSection) {
-        resumeSection.style.display = 'none';
-    }
 }
 
 function renderSkills(allSkills, verifiedSkills) {

@@ -44,13 +44,14 @@ function adminToggleDark() {
 
 // ---------- Tab Switching ----------
 function switchTab(tabName) {
-    ['post-job', 'students', 'apply-student', 'applicants', 'stats'].forEach(t => {
-        document.getElementById(`tab-${t}`).classList.add('hidden');
+    ['post-job', 'students', 'apply-student', 'applicants', 'rankings', 'stats'].forEach(t => {
+        const el = document.getElementById(`tab-${t}`);
+        if (el) el.classList.add('hidden');
     });
     document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
     document.getElementById(`tab-${tabName}`).classList.remove('hidden');
 
-    const idx = { 'post-job': 0, 'students': 1, 'apply-student': 2, 'applicants': 3, 'stats': 4 }[tabName];
+    const idx = { 'post-job': 0, 'students': 1, 'apply-student': 2, 'applicants': 3, 'rankings': 4, 'stats': 5 }[tabName];
     const navItems = document.querySelectorAll('.nav-item');
     if (navItems[idx]) navItems[idx].classList.add('active');
 
@@ -58,6 +59,7 @@ function switchTab(tabName) {
     if (tabName === 'stats') loadAdminStats();
     if (tabName === 'students') loadStudents();
     if (tabName === 'apply-student') loadApplyDropdowns();
+    if (tabName === 'rankings') loadRankings();
 }
 
 function logout() {
@@ -502,3 +504,145 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+// ==========================================
+// STUDENT RANKINGS TAB
+// ==========================================
+let allRankingsCache = [];
+
+async function loadRankings() {
+    const tbody = document.getElementById('rankingList');
+    const podium = document.getElementById('rankingPodium');
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:3rem;color:#94a3b8;">
+        <i class="fas fa-spinner fa-spin fa-2x"></i><br><br>Loading rankings...</td></tr>`;
+    if (podium) podium.innerHTML = '';
+
+    try {
+        const res = await authenticatedFetch('/admin/rankings');
+        if (!res.ok) throw new Error('Fetch failed');
+        const data = await res.json();
+        allRankingsCache = Array.isArray(data.data) ? data.data : [];
+
+        document.getElementById('rankingBadge').textContent = allRankingsCache.length;
+
+        // Populate department and batch filters
+        const depts = [...new Set(allRankingsCache.map(s => s.department).filter(Boolean))].sort();
+        const batches = [...new Set(allRankingsCache.map(s => s.batch_year).filter(Boolean))].sort();
+        const deptSelect = document.getElementById('rankDeptFilter');
+        const batchSelect = document.getElementById('rankBatchFilter');
+        deptSelect.innerHTML = '<option value="">All Departments</option>' + depts.map(d => `<option value="${d}">${escapeAdmin(d)}</option>`).join('');
+        batchSelect.innerHTML = '<option value="">All Batches</option>' + batches.map(b => `<option value="${b}">${escapeAdmin(b)}</option>`).join('');
+
+        renderRankings(allRankingsCache);
+    } catch (err) {
+        console.error(err);
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:3rem;color:#ef4444;">
+            <i class="fas fa-exclamation-circle fa-2x"></i><br><br>Failed to load rankings.</td></tr>`;
+    }
+}
+
+function filterRankings() {
+    const q = (document.getElementById('rankSearch')?.value || '').toLowerCase();
+    const dept = document.getElementById('rankDeptFilter')?.value || '';
+    const batch = document.getElementById('rankBatchFilter')?.value || '';
+    const filtered = allRankingsCache.filter(s => {
+        const matchQ = !q || (s.full_name || '').toLowerCase().includes(q) || (s.email || '').toLowerCase().includes(q);
+        const matchD = !dept || s.department === dept;
+        const matchB = !batch || String(s.batch_year) === batch;
+        return matchQ && matchD && matchB;
+    });
+    renderRankings(filtered);
+}
+
+function renderRankings(students) {
+    const tbody = document.getElementById('rankingList');
+    const podium = document.getElementById('rankingPodium');
+
+    if (!students.length) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:3rem;color:#94a3b8;">No students match your filter.</td></tr>`;
+        if (podium) podium.innerHTML = '';
+        return;
+    }
+
+    // Top 3 Podium
+    if (podium) {
+        const top3 = students.slice(0, 3);
+        const medals = ['🥇', '🥈', '🥉'];
+        const medalColors = [
+            { bg: 'linear-gradient(135deg, #fef3c7, #fde68a)', border: '#f59e0b', glow: 'rgba(245,158,11,0.3)' },
+            { bg: 'linear-gradient(135deg, #f1f5f9, #e2e8f0)', border: '#94a3b8', glow: 'rgba(148,163,184,0.3)' },
+            { bg: 'linear-gradient(135deg, #fef3c7, #fed7aa)', border: '#f97316', glow: 'rgba(249,115,22,0.25)' }
+        ];
+        const avatarGradients = [
+            'linear-gradient(135deg, #f59e0b, #d97706)',
+            'linear-gradient(135deg, #64748b, #475569)',
+            'linear-gradient(135deg, #f97316, #ea580c)'
+        ];
+
+        podium.innerHTML = `<div class="podium-grid">${top3.map((s, i) => {
+            const initials = (s.full_name || 'NA').split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+            const score = Number(s.ranking_score || 0).toFixed(1);
+            const skillCount = s.verified_skills_count || 0;
+            return `
+            <div class="podium-card ${i === 0 ? 'podium-gold' : ''}" style="background:${medalColors[i].bg}; border:2px solid ${medalColors[i].border}; box-shadow:0 8px 32px ${medalColors[i].glow};">
+                <div class="podium-medal">${medals[i]}</div>
+                <div class="podium-avatar" style="background:${avatarGradients[i]};">${initials}</div>
+                <h4 class="podium-name">${escapeAdmin(s.full_name || 'N/A')}</h4>
+                <p class="podium-dept">${escapeAdmin(s.department || 'N/A')} ${s.batch_year ? '• ' + s.batch_year : ''}</p>
+                <div class="podium-score">${score}</div>
+                <div class="podium-stats-row">
+                    <span title="CGPA"><i class="fas fa-graduation-cap"></i> ${Number(s.cgpa || 0).toFixed(1)}</span>
+                    <span title="Verified Skills"><i class="fas fa-check-double"></i> ${skillCount}</span>
+                    <span title="Offers"><i class="fas fa-trophy"></i> ${s.offers_count || 0}</span>
+                </div>
+                ${s.college_verified ? '<div class="podium-verified"><i class="fas fa-shield-check"></i> College Verified</div>' : ''}
+            </div>`;
+        }).join('')}</div>`;
+    }
+
+    // Full table
+    tbody.innerHTML = students.map((s, i) => {
+        const rank = i + 1;
+        const score = Number(s.ranking_score || 0).toFixed(1);
+        const skillCount = s.verified_skills_count || 0;
+        const skills = Array.isArray(s.verified_skills) ? s.verified_skills : [];
+        const skillPills = skills.slice(0, 3).map(sk => `<span class="ranking-skill-pill">${escapeAdmin(sk)}</span>`).join('') + (skills.length > 3 ? `<span class="ranking-skill-pill more">+${skills.length - 3}</span>` : '');
+        const rankBadge = rank === 1 ? '<span class="rank-medal gold">🥇</span>'
+            : rank === 2 ? '<span class="rank-medal silver">🥈</span>'
+                : rank === 3 ? '<span class="rank-medal bronze">🥉</span>'
+                    : `<span class="rank-number">${rank}</span>`;
+
+        return `
+        <tr class="app-row ranking-row ${rank <= 3 ? 'top-rank' : ''}">
+            <td style="text-align:center;">${rankBadge}</td>
+            <td>
+                <div style="display:flex;align-items:center;gap:10px;">
+                    <div class="ranking-avatar" style="background:${rank <= 3 ? 'linear-gradient(135deg,#f59e0b,#d97706)' : 'linear-gradient(135deg,#6366f1,#4f46e5)'};">
+                        ${(s.full_name || 'NA').split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase()}
+                    </div>
+                    <div>
+                        <strong>${escapeAdmin(s.full_name || 'N/A')}</strong>
+                        ${s.college_verified ? '<i class="fas fa-check-circle" style="color:#3b82f6;margin-left:4px;font-size:0.75rem;" title="College Verified"></i>' : ''}
+                        <div style="font-size:0.78rem;color:#94a3b8;">${escapeAdmin(s.email || '')}</div>
+                    </div>
+                </div>
+            </td>
+            <td style="color:#64748b;font-size:0.85rem;">${escapeAdmin(s.department || '—')} ${s.batch_year ? '<br><span style="font-size:0.75rem;color:#94a3b8;">Batch ' + escapeAdmin(s.batch_year) + '</span>' : ''}</td>
+            <td>
+                <span class="cgpa-badge ${Number(s.cgpa) >= 8 ? 'cgpa-high' : Number(s.cgpa) >= 6 ? 'cgpa-mid' : 'cgpa-low'}">${Number(s.cgpa || 0).toFixed(1)}</span>
+            </td>
+            <td>
+                <div style="display:flex;flex-wrap:wrap;gap:4px;">${skillPills || '<span style="color:#cbd5e1;font-size:0.8rem;">None</span>'}</div>
+            </td>
+            <td style="text-align:center;">
+                <span class="app-count-badge">${s.total_applications || 0}</span>
+            </td>
+            <td style="text-align:center;">
+                <span class="offer-count-badge ${(s.offers_count || 0) > 0 ? 'has-offers' : ''}">${s.offers_count || 0}</span>
+            </td>
+            <td style="text-align:center;">
+                <div class="ranking-score-badge">${score}</div>
+            </td>
+        </tr>`;
+    }).join('');
+}

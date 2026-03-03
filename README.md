@@ -136,7 +136,7 @@ Ensure the following software is installed on your system:
 **Method B: Clone with Git**
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/hnikhil-dev/PlacementTracker
 cd placement-tracker
 ```
 

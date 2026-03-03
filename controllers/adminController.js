@@ -48,6 +48,77 @@ exports.verifyStudent = async (req, res, next) => {
     } catch (err) { next(err); }
 };
 
+// GET /api/admin/rankings — student ranking list
+exports.getStudentRankings = async (req, res, next) => {
+    if (req.user.role !== 'admin') return next(new AppError('Forbidden', 403));
+    try {
+        const result = await pool.query(`
+            SELECT
+                u.id,
+                u.full_name,
+                u.email,
+                u.department,
+                u.batch_year,
+                COALESCE(u.cgpa, 0) AS cgpa,
+                COALESCE(array_length(u.verified_skills, 1), 0) AS verified_skills_count,
+                u.verified_skills,
+                COALESCE(u.college_verified, false) AS college_verified,
+                COUNT(a.id) AS total_applications,
+                COUNT(CASE WHEN a.status = 'Offered' THEN 1 END) AS offers_count,
+                COUNT(CASE WHEN a.status = 'Shortlisted' THEN 1 END) AS shortlisted_count,
+                COUNT(CASE WHEN a.status = 'Rejected' THEN 1 END) AS rejected_count,
+                -- Composite ranking score
+                (
+                    COALESCE(u.cgpa, 0) * 10 +
+                    COALESCE(array_length(u.verified_skills, 1), 0) * 8 +
+                    COUNT(CASE WHEN a.status = 'Offered' THEN 1 END) * 25 +
+                    COUNT(CASE WHEN a.status = 'Shortlisted' THEN 1 END) * 10 +
+                    COUNT(a.id) * 2 +
+                    CASE WHEN COALESCE(u.college_verified, false) THEN 5 ELSE 0 END
+                ) AS ranking_score
+            FROM users u
+            LEFT JOIN applications a ON a.user_id = u.id
+            WHERE u.role = 'student'
+            GROUP BY u.id, u.full_name, u.email, u.department, u.batch_year, u.cgpa,
+                     u.verified_skills, u.college_verified
+            ORDER BY ranking_score DESC, u.cgpa DESC, u.full_name ASC
+        `);
+        res.json({ status: 'success', data: result.rows });
+    } catch (err) {
+        // Fallback if college_verified column doesn't exist
+        if (err.message && err.message.includes('college_verified')) {
+            try {
+                const result = await pool.query(`
+                    SELECT
+                        u.id, u.full_name, u.email, u.department, u.batch_year,
+                        COALESCE(u.cgpa, 0) AS cgpa,
+                        COALESCE(array_length(u.verified_skills, 1), 0) AS verified_skills_count,
+                        u.verified_skills,
+                        false AS college_verified,
+                        COUNT(a.id) AS total_applications,
+                        COUNT(CASE WHEN a.status = 'Offered' THEN 1 END) AS offers_count,
+                        COUNT(CASE WHEN a.status = 'Shortlisted' THEN 1 END) AS shortlisted_count,
+                        COUNT(CASE WHEN a.status = 'Rejected' THEN 1 END) AS rejected_count,
+                        (
+                            COALESCE(u.cgpa, 0) * 10 +
+                            COALESCE(array_length(u.verified_skills, 1), 0) * 8 +
+                            COUNT(CASE WHEN a.status = 'Offered' THEN 1 END) * 25 +
+                            COUNT(CASE WHEN a.status = 'Shortlisted' THEN 1 END) * 10 +
+                            COUNT(a.id) * 2
+                        ) AS ranking_score
+                    FROM users u
+                    LEFT JOIN applications a ON a.user_id = u.id
+                    WHERE u.role = 'student'
+                    GROUP BY u.id, u.full_name, u.email, u.department, u.batch_year, u.cgpa, u.verified_skills
+                    ORDER BY ranking_score DESC, u.cgpa DESC, u.full_name ASC
+                `);
+                return res.json({ status: 'success', data: result.rows });
+            } catch (fallbackErr) { return next(fallbackErr); }
+        }
+        next(err);
+    }
+};
+
 // POST /api/admin/applications — create application on behalf of a student
 exports.createApplicationForStudent = async (req, res, next) => {
     if (req.user.role !== 'admin') return next(new AppError('Forbidden', 403));

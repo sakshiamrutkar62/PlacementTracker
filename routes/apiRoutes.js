@@ -65,6 +65,7 @@ router.get('/skills/history', authMiddleware, skillController.getQuizHistory);
 
 // --- ADMIN STUDENT MANAGEMENT ---
 router.get('/admin/students', authMiddleware, adminController.listStudents);
+router.get('/admin/rankings', authMiddleware, adminController.getStudentRankings);
 router.put('/admin/students/:id/verify', authMiddleware, adminController.verifyStudent);
 router.post('/admin/applications', authMiddleware, adminController.createApplicationForStudent);
 

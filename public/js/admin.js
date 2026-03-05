@@ -1,5 +1,5 @@
 ﻿/* =========================================================
-   ECampus Placement Admin Panel JS
+    Placement Tracker Admin Panel JS
    ========================================================= */
 
 // ---------- Auth Guard ----------
@@ -399,7 +399,7 @@ function renderStudentsTable(students) {
             <td style="color:#64748b;font-size:0.85rem;">${escapeAdmin(s.email || '—')}</td>
             <td style="color:#64748b;font-size:0.85rem;">${escapeAdmin(s.batch_year || '—')}</td>
             <td style="text-align:center;">
-                <span style="background:#f5f3ff;color:#7c3aed;padding:3px 10px;border-radius:20px;font-size:0.8rem;font-weight:600;">
+                <span style="background:#ecfdf3;color:#166534;padding:3px 10px;border-radius:20px;font-size:0.8rem;font-weight:600;">
                     ${verifiedSkillsCount} skill${verifiedSkillsCount !== 1 ? 's' : ''}
                 </span>
             </td>
@@ -617,7 +617,7 @@ function renderRankings(students) {
             <td style="text-align:center;">${rankBadge}</td>
             <td>
                 <div style="display:flex;align-items:center;gap:10px;">
-                    <div class="ranking-avatar" style="background:${rank <= 3 ? 'linear-gradient(135deg,#f59e0b,#d97706)' : 'linear-gradient(135deg,#6366f1,#4f46e5)'};">
+                    <div class="ranking-avatar" style="background:${rank <= 3 ? 'linear-gradient(135deg,#f59e0b,#d97706)' : 'linear-gradient(135deg,#25a244,#1a7a32)'};">
                         ${(s.full_name || 'NA').split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase()}
                     </div>
                     <div>

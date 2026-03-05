@@ -4,12 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register - Placement Tracker</title>
+    <title>Register – Placement Tracker</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
     <link rel="stylesheet" href="css/style.css">
 
     <style>
@@ -18,11 +17,33 @@
         }
 
         .error-text {
-            color: #ef4444;
-            font-size: 0.9rem;
+            color: #e74c3c;
+            font-size: 0.88rem;
             margin-top: 10px;
             text-align: center;
             font-weight: 500;
+            background: #fef2f2;
+            border: 1px solid #fca5a5;
+            border-radius: 8px;
+            padding: 10px 14px;
+        }
+
+        .input-icon-wrap {
+            position: relative;
+        }
+
+        .input-icon-wrap i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            font-size: 0.9rem;
+            pointer-events: none;
+        }
+
+        .input-icon-wrap .form-input {
+            padding-left: 42px;
         }
     </style>
 </head>
@@ -31,67 +52,96 @@
 
     <div class="auth-container">
 
-        <div class="auth-card" style="max-width: 500px;">
-            <div class="auth-header">
-                <div style="font-size: 3.5rem; margin-bottom: 1rem; position:relative; display:inline-block;">
-                    <i class="fas fa-user-plus"
-                        style="background:linear-gradient(135deg, #4f46e5, #7c3aed); -webkit-background-clip:text; -webkit-text-fill-color:transparent;"></i>
-                    <div
-                        style="position:absolute; inset:0; background:radial-gradient(circle, rgba(79,70,229,0.15) 0%, transparent 70%); filter:blur(12px); z-index:-1;">
-                    </div>
-                </div>
-                <h1>Create Account</h1>
-                <p>Start your career journey with us.</p>
+        <!-- ===== LEFT BRANDING PANEL ===== -->
+        <div class="auth-left-panel">
+            <div class="auth-left-brand">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Placement Tracker</span>
             </div>
-
-            <form id="registerForm" style="text-align: left;">
-
-                <div class="form-group">
-                    <label class="form-label">Full Name</label>
-                    <div style="position: relative;">
-                        <i class="fas fa-user" style="position: absolute; left: 15px; top: 14px; color: #94a3b8;"></i>
-                        <input type="text" id="regName" class="form-input" placeholder="John Doe"
-                            style="padding-left: 45px;" required>
-                    </div>
+            <h2>Join thousands of students building great careers.</h2>
+            <ul class="auth-features">
+                <li><i class="fas fa-check-circle"></i> Create your official placement profile</li>
+                <li><i class="fas fa-check-circle"></i> Get AI-verified skill badges employers trust</li>
+                <li><i class="fas fa-check-circle"></i> Receive personalized job recommendations</li>
+                <li><i class="fas fa-check-circle"></i> Track your placement journey end-to-end</li>
+            </ul>
+            <div class="auth-stat-row">
+                <div class="auth-stat-item">
+                    <span class="num">10K+</span>
+                    <span class="lbl">Students</span>
                 </div>
-
-                <div class="form-group">
-                    <label class="form-label">Email Address</label>
-                    <div style="position: relative;">
-                        <i class="fas fa-envelope"
-                            style="position: absolute; left: 15px; top: 14px; color: #94a3b8;"></i>
-                        <input type="email" id="regEmail" class="form-input" placeholder="student@college.edu"
-                            style="padding-left: 45px;" required>
-                    </div>
+                <div class="auth-stat-item">
+                    <span class="num">500+</span>
+                    <span class="lbl">Opportunities</span>
                 </div>
-
-                <div class="form-group">
-                    <label class="form-label">Password</label>
-                    <div style="position: relative;">
-                        <i class="fas fa-lock" style="position: absolute; left: 15px; top: 14px; color: #94a3b8;"></i>
-                        <input type="password" id="regPassword" class="form-input" placeholder="Min 6 chars"
-                            style="padding-left: 45px;" required>
-                    </div>
+                <div class="auth-stat-item">
+                    <span class="num">200+</span>
+                    <span class="lbl">Companies</span>
                 </div>
-
-                <input type="hidden" id="regRole" value="student">
-
-                <button type="submit" class="btn btn-primary"
-                    style="width: 100%; justify-content: center; padding: 1rem; font-size: 1rem;">
-                    <span id="regBtnText">Sign Up</span>
-                    <i id="regLoader" class="fas fa-circle-notch fa-spin hidden" style="margin-left: 10px;"></i>
-                </button>
-
-                <p id="regErrorMsg" class="error-text hidden"></p>
-
-            </form>
-
-            <div class="auth-links" style="justify-content: center;">
-                <span style="color: #64748b;">Already have an account? </span>
-                <a href="index.html" style="margin-left: 5px;">Login here</a>
             </div>
-
         </div>
+
+        <!-- ===== RIGHT FORM PANEL ===== -->
+        <div class="auth-right-panel">
+            <div class="auth-card">
+
+                <div class="auth-header">
+                    <div
+                        style="width:60px;height:60px;background:#eef7f0;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:1.6rem;color:#25a244;">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                    <h1>Create Account</h1>
+                    <p>Start your career journey with us today</p>
+                </div>
+
+                <form id="registerForm" style="text-align: left;">
+
+                    <div class="form-group">
+                        <label class="form-label">Full Name</label>
+                        <div class="input-icon-wrap">
+                            <i class="fas fa-user"></i>
+                            <input type="text" id="regName" class="form-input" placeholder="John Doe" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Email Address</label>
+                        <div class="input-icon-wrap">
+                            <i class="fas fa-envelope"></i>
+                            <input type="email" id="regEmail" class="form-input" placeholder="student@college.edu"
+                                required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <div class="input-icon-wrap">
+                            <i class="fas fa-lock"></i>
+                            <input type="password" id="regPassword" class="form-input"
+                                placeholder="Minimum 6 characters" required>
+                        </div>
+                    </div>
+
+                    <input type="hidden" id="regRole" value="student">
+
+                    <button type="submit" class="btn btn-primary"
+                        style="width:100%;justify-content:center;padding:0.85rem;font-size:0.95rem;margin-top:0.5rem;">
+                        <span id="regBtnText">Create Account</span>
+                        <i id="regLoader" class="fas fa-circle-notch fa-spin hidden"></i>
+                    </button>
+
+                    <p id="regErrorMsg" class="error-text hidden"></p>
+
+                </form>
+
+                <div class="auth-links" style="justify-content: center; gap: 6px;">
+                    <span style="color:#6b7280;">Already have an account?</span>
+                    <a href="index.html">Login here</a>
+                </div>
+
+            </div>
+        </div>
+
     </div>
 
     <script src="js/config.js"></script>

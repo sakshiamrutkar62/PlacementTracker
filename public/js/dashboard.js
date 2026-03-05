@@ -1,5 +1,5 @@
 // ==========================================
-// ECAMPUS DASHBOARD CONTROLLER - NEXT LEVEL
+// PLACEMENT TRACKER DASHBOARD CONTROLLER - NEXT LEVEL
 // ==========================================
 
 // --- GLOBAL STATE ---
@@ -1129,7 +1129,7 @@ async function runSkillGap() {
             const safeUrl = rawUrl ? (rawUrl.startsWith('http') ? rawUrl : `https://${rawUrl}`) : '';
             return `
                         <div style="background:white;border-radius:10px;padding:14px;border:1px solid #e2e8f0;display:flex;gap:12px;align-items:flex-start;">
-                            <div style="background:linear-gradient(135deg,var(--primary),#7c3aed);color:white;border-radius:8px;padding:6px 12px;font-weight:700;font-size:0.85rem;white-space:nowrap;">Wk ${w.week}</div>
+                            <div style="background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:white;border-radius:8px;padding:6px 12px;font-weight:700;font-size:0.85rem;white-space:nowrap;">Wk ${w.week}</div>
                             <div>
                                 <p style="font-weight:600;color:#1e293b;margin-bottom:3px;">${escapeHtml(w.focus || '')}</p>
                                 <p style="color:#64748b;font-size:0.85rem;margin-bottom:4px;">${escapeHtml(w.goal || '')}</p>
@@ -1169,7 +1169,7 @@ async function downloadProfile() {
     const allSkills = u.skills || [];
     const verifiedSkills = u.verified_skills || [];
     const initials = name.replace(/[^A-Z]/g, '') || name.charAt(0).toUpperCase() || 'S';
-    const profileId = 'EC-' + Math.random().toString(36).substr(2, 8).toUpperCase();
+    const profileId = 'PT-' + Math.random().toString(36).substr(2, 8).toUpperCase();
     const dateIssued = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' });
     const scoreColor = stats.profileScore >= 70 ? '#16a34a' : stats.profileScore >= 40 ? '#d97706' : '#dc2626';
 
@@ -1193,17 +1193,17 @@ async function downloadProfile() {
   .page { width: 210mm; min-height: 297mm; padding: 18mm 18mm 14mm; }
 
   /* ── HEADER ── */
-  .hdr { display:flex; align-items:center; justify-content:space-between; padding-bottom:10px; border-bottom:3px solid #4f46e5; margin-bottom:18px; }
+    .hdr { display:flex; align-items:center; justify-content:space-between; padding-bottom:10px; border-bottom:3px solid #25a244; margin-bottom:18px; }
   .hdr-logo  { display:flex; align-items:center; gap:10px; }
-  .hdr-icon  { width:46px; height:46px; border-radius:10px; background:linear-gradient(135deg,#4f46e5,#7c3aed); display:flex; align-items:center; justify-content:center; color:#fff; font-size:22px; font-weight:900; }
-  .hdr-title { font-size:20px; font-weight:800; color:#4f46e5; letter-spacing:-0.3px; }
+    .hdr-icon  { width:46px; height:46px; border-radius:10px; background:linear-gradient(135deg,#25a244,#1a7a32); display:flex; align-items:center; justify-content:center; color:#fff; font-size:22px; font-weight:900; }
+    .hdr-title { font-size:20px; font-weight:800; color:#25a244; letter-spacing:-0.3px; }
   .hdr-sub   { font-size:10px; color:#64748b; margin-top:1px; }
   .doc-label { text-align:right; }
   .doc-label h2 { font-size:13px; font-weight:700; color:#1e293b; letter-spacing:0.5px; text-transform:uppercase; }
   .doc-label p  { font-size:9px; color:#64748b; margin-top:2px; }
 
   /* ── STUDENT BANNER ── */
-  .student-banner { background:linear-gradient(135deg,#4f46e5 0%,#7c3aed 100%); border-radius:12px; padding:18px 22px; display:flex; align-items:center; gap:18px; margin-bottom:18px; color:#fff; }
+    .student-banner { background:linear-gradient(135deg,#25a244 0%,#1a7a32 100%); border-radius:12px; padding:18px 22px; display:flex; align-items:center; gap:18px; margin-bottom:18px; color:#fff; }
   .avatar { width:62px; height:62px; border-radius:50%; background:rgba(255,255,255,0.2); border:3px solid rgba(255,255,255,0.5); display:flex; align-items:center; justify-content:center; font-size:26px; font-weight:800; color:#fff; flex-shrink:0; }
   .student-info h1 { font-size:20px; font-weight:800; letter-spacing:-0.3px; }
   .student-info .meta { font-size:10px; opacity:0.85; margin-top:5px; }
@@ -1216,7 +1216,7 @@ async function downloadProfile() {
 
   /* ── SECTION ── */
   .section { margin-bottom:16px; }
-  .sec-title { display:flex; align-items:center; gap:7px; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.7px; color:#4f46e5; border-bottom:1.5px solid #e0e7ff; padding-bottom:5px; margin-bottom:10px; }
+    .sec-title { display:flex; align-items:center; gap:7px; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.7px; color:#25a244; border-bottom:1.5px solid #d1fae5; padding-bottom:5px; margin-bottom:10px; }
   .sec-title span { font-size:13px; }
 
   /* ── INFO TABLE ── */
@@ -1246,7 +1246,7 @@ async function downloadProfile() {
   .footer { margin-top:18px; padding-top:10px; border-top:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:flex-end; }
   .footer-left  { font-size:8.5px; color:#94a3b8; line-height:1.6; }
   .footer-right { text-align:right; font-size:8.5px; color:#94a3b8; }
-  .watermark    { color:#4f46e5; font-weight:700; font-size:9px; }
+    .watermark    { color:#25a244; font-weight:700; font-size:9px; }
 
   .verified-note { background:#fefce8; border:1px solid #fde68a; border-radius:6px; padding:6px 10px; font-size:9.5px; color:#92400e; margin-bottom:8px; }
   .resume-badge  { display:inline-flex; align-items:center; gap:5px; background:#f0fdf4; border:1px solid #86efac; color:#166534; padding:4px 12px; border-radius:20px; font-size:10px; font-weight:600; }
@@ -1259,10 +1259,10 @@ async function downloadProfile() {
   <!-- HEADER -->
   <div class="hdr">
     <div class="hdr-logo">
-      <div class="hdr-icon">E</div>
+                <div class="hdr-icon">P</div>
       <div>
-        <div class="hdr-title">ECampus</div>
-        <div class="hdr-sub">Smart Digital Campus Platform — Placement Division</div>
+                <div class="hdr-title">Placement Tracker</div>
+                <div class="hdr-sub">Placement & Internship Management Platform</div>
       </div>
     </div>
     <div class="doc-label">
@@ -1328,8 +1328,8 @@ async function downloadProfile() {
         <div class="stat-num" style="color:#dc2626;">${stats.rejected}</div>
         <div class="stat-lbl">Rejected</div>
       </div>
-      <div class="stat-box" style="background:#f5f3ff;border-color:#c4b5fd;">
-        <div class="stat-num" style="color:#7c3aed;">${verifiedSkills.length}</div>
+            <div class="stat-box" style="background:#ecfdf3;border-color:#bbf7d0;">
+                <div class="stat-num" style="color:#25a244;">${verifiedSkills.length}</div>
         <div class="stat-lbl">Verified Skills</div>
       </div>
     </div>
@@ -1344,7 +1344,7 @@ async function downloadProfile() {
     </div>
     <div class="bar-row">
       <div class="bar-label"><span>AI-Verified Skills</span><span>${Math.min(verifiedSkills.length * 10, 40)}/40 pts</span></div>
-      <div class="bar-track"><div class="bar-fill" style="width:${Math.min((verifiedSkills.length * 10 / 40) * 100, 100)}%;background:#7c3aed;"></div></div>
+    <div class="bar-track"><div class="bar-fill" style="width:${Math.min((verifiedSkills.length * 10 / 40) * 100, 100)}%;background:#25a244;"></div></div>
     </div>
     <div class="bar-row">
       <div class="bar-label"><span>Resume Skills</span><span>${Math.min(allSkills.length * 2, 20)}/20 pts</span></div>
@@ -1362,7 +1362,7 @@ async function downloadProfile() {
     <div class="sec-title"><span>★</span> AI-Certified Skill Competency</div>
     ${verifiedSkills.length > 0 ? `
       <div class="verified-note">
-        The following skills have been assessed and certified by ECampus AI Assessment System. Each skill was tested via a 5-question adaptive quiz with a minimum passing score of 80%.
+        The following skills have been assessed and certified by Placement Tracker AI Assessment System. Each skill was tested via a 5-question adaptive quiz with a minimum passing score of 80%.
       </div>
       <div style="margin-bottom:6px;">${renderSkillRow(verifiedSkills, true)}</div>
     ` : `<p class="no-skill">No skills AI-verified yet. Use the Skill Assessment feature on the dashboard.</p>`}
@@ -1381,13 +1381,13 @@ async function downloadProfile() {
   <div class="section">
     <div class="sec-title"><span>Certification</span> Certification &amp; Signatures</div>
     <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;font-size:9.5px;color:#475569;line-height:1.6;margin-bottom:12px;">
-      This document certifies that <strong>${name}</strong> is a registered student on the ECampus Smart Digital Campus Platform. 
+    This document certifies that <strong>${name}</strong> is a registered student on the Placement Tracker platform. 
       The skill competency ratings herein are generated based on AI-assisted assessments conducted on the platform. 
       This profile is valid for use in college placement drives, internship applications, and company onboarding processes.
     </div>
     <div class="sig-row">
       <div class="sig-box"><div class="sig-line">Student Signature<br>${name}</div></div>
-      <div class="sig-box"><div class="sig-line">Placement Officer<br>ECampus Platform</div></div>
+    <div class="sig-box"><div class="sig-line">Placement Officer<br>Placement Tracker</div></div>
       <div class="sig-box"><div class="sig-line">Date of Issue<br>${dateIssued}</div></div>
     </div>
   </div>
@@ -1395,9 +1395,9 @@ async function downloadProfile() {
   <!-- FOOTER -->
   <div class="footer">
     <div class="footer-left">
-      <div class="watermark">ECampus — Smart Digital Campus Platform</div>
+    <div class="watermark">Placement Tracker — Placement Platform</div>
       <div>This is a digitally generated document. Profile ID: ${profileId}</div>
-      <div>Verify authenticity at: ecampus.platform/verify/${profileId}</div>
+    <div>Verify authenticity at: placementtracker.platform/verify/${profileId}</div>
     </div>
     <div class="footer-right">
       <div>Generated on ${dateIssued}</div>

@@ -576,7 +576,7 @@
 <body>
 
     <!-- Toast Container -->
-    <div id="toast-admin"></div>
+    <div id="toast-admin" aria-live="polite" aria-atomic="true"></div>
 
     <!-- ====== MOBILE TOPBAR ====== -->
     <div class="mobile-topbar">
@@ -608,22 +608,22 @@
 
             <div class="sidebar-header-sub">Management</div>
             <ul class="nav-links">
-                <li class="nav-item active" onclick="switchTab('post-job')">
-                    <i class="fas fa-plus-circle"></i> Post Opportunity
+                <li class="nav-item active" onclick="switchTab('post-job')" title="Post Opportunity">
+                    <i class="fas fa-plus-circle"></i> Post
                 </li>
                 <li class="nav-item" onclick="switchTab('students')">
                     <i class="fas fa-user-graduate"></i> Students
                     <span class="nav-badge" id="studentBadge">0</span>
                 </li>
-                <li class="nav-item" onclick="switchTab('apply-student')">
-                    <i class="fas fa-file-signature"></i> Apply for Student
+                <li class="nav-item" onclick="switchTab('apply-student')" title="Apply for Student">
+                    <i class="fas fa-file-signature"></i> Apply
                 </li>
                 <li class="nav-item" onclick="switchTab('applicants')">
                     <i class="fas fa-users"></i> Applicants
                     <span class="nav-badge" id="totalBadge">0</span>
                 </li>
-                <li class="nav-item" onclick="switchTab('rankings')">
-                    <i class="fas fa-ranking-star"></i> Student Rankings
+                <li class="nav-item" onclick="switchTab('rankings')" title="Student Rankings">
+                    <i class="fas fa-ranking-star"></i> Rankings
                     <span class="nav-badge" id="rankingBadge" style="background:#f59e0b;">0</span>
                 </li>
                 <li class="nav-item" onclick="switchTab('stats')">

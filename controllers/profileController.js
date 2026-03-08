@@ -51,7 +51,7 @@ exports.uploadResume = async (req, res, next) => {
             'data analysis', 'data science', 'tensorflow', 'pytorch', 'scikit',
             'cybersecurity', 'penetration testing', 'blockchain', 'solidity', 'iot',
             'linux', 'bash', 'shell', 'jenkins', 'ci/cd', 'devops', 'agile', 'scrum',
-            'figma', 'photoshop', 'ui/ux', 'flutter', 'dart', 'react native'
+            'figma', 'photoshop', 'ui/ux', 'flutter', 'dart', 'react native', "compiler constructor"
         ];
 
         foundSkills = possibleSkills.filter(skill => resumeText.includes(skill));

@@ -724,7 +724,7 @@ async function uploadResume() {
             showToast(`Resume parsed! ${skillCount} skills found.`, 'success');
         } else {
             uploadStatus.innerHTML = `<p style="color:#ef4444;"><i class="fas fa-exclamation-circle"></i> ${escapeHtml(data.message || 'Upload failed.')}</p>`;
-            showToast('Resume upload failed.', 'error');
+            showToast(data.message || 'Resume upload failed.', 'error');
         }
     } catch (err) {
         uploadStatus.innerHTML = `<p style="color:#ef4444;">Server error. Please try again.</p>`;

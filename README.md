@@ -35,6 +35,8 @@ The Smart Student Placement Manager is an enterprise-grade web application desig
 
 ### Key Capabilities
 
+- **AI-Powered Student Rankings**: Admins can view a dynamic ranking of students based on a composite score calculated from their skills, application success, and profile completeness.
+- **Premium Glassmorphism UI**: A complete visual overhaul featuring a modern, premium design with glass-morphism effects, gradients, and smooth animations for an enhanced user experience.
 - Automated resume parsing with AI-powered skill extraction
 - Real-time application status tracking
 - Intelligent Internship/Job matching based on candidate skills
@@ -48,18 +50,19 @@ The Smart Student Placement Manager is an enterprise-grade web application desig
 
 ### For Students
 
-- **Secure Authentication**: Create accounts and log in with encrypted credentials
-- **AI Resume Parser**: Upload PDF resumes for automatic skill extraction using advanced parsing algorithms
-- **Internship/Job Discovery**: Browse comprehensive listings with salary ranges, requirements, and company details
-- **One-Click Applications**: Apply to positions instantly with pre-filled profile information
-- **Real-Time Tracking**: Monitor application status (Applied, Shortlisted, Rejected) with live updates
+- **Secure Authentication**: Create accounts and log in with encrypted credentials.
+- **AI Resume Parser**: Upload PDF resumes for automatic skill extraction using advanced parsing algorithms.
+- **Internship/Job Discovery**: Browse comprehensive listings with salary ranges, requirements, and company details.
+- **One-Click Applications**: Apply to positions instantly with pre-filled profile information.
+- **Real-Time Tracking**: Monitor application status (Applied, Shortlisted, Rejected) with live updates.
 
-### For Placement Officers
+### For Placement Officers (Admin)
 
-- **Internship/Job Management**: Post new opportunities with detailed requirements and deadlines
-- **Applicant Dashboard**: View organized lists of candidates for each position
-- **Candidate Evaluation**: Shortlist or reject applicants with streamlined decision workflows
-- **Resume Access**: Instant access to candidate resumes and verified skill profiles
+- **Internship/Job Management**: Post new opportunities with detailed requirements and deadlines.
+- **Applicant Dashboard**: View organized lists of candidates for each position.
+- **Candidate Evaluation**: Shortlist or reject applicants with streamlined decision workflows.
+- **Student Ranking Dashboard**: Access a sophisticated ranking system to identify top-performing students based on a multi-faceted scoring algorithm.
+- **Resume Access**: Instant access to candidate resumes and verified skill profiles.
 
 ---
 
@@ -67,37 +70,167 @@ The Smart Student Placement Manager is an enterprise-grade web application desig
 
 ### Frontend
 
-- **HTML5/CSS3**: Modern, responsive design with Glassmorphism UI
-- **JavaScript (ES6+)**: Client-side interactivity and dynamic content
-- **Fetch API**: Asynchronous HTTP requests
+- **HTML5/CSS3**: Modern, responsive design with a premium Glassmorphism UI.
+- **JavaScript (ES6+)**: Client-side interactivity and dynamic content.
+- **Fetch API**: Asynchronous HTTP requests.
 
 ### Backend
 
-- **Node.js**: JavaScript runtime environment
-- **Express.js**: Web application framework
-- **JWT**: JSON Web Tokens for secure authentication
-- **Bcrypt**: Password hashing and encryption
+- **Node.js**: JavaScript runtime environment.
+- **Express.js**: Web application framework.
+- **JWT**: JSON Web Tokens for secure authentication.
+- **Bcrypt**: Password hashing and encryption.
 
 ### Database & Storage
 
-- **PostgreSQL**: Relational database via Supabase
-- **Supabase Storage**: Cloud-based file storage for resumes
+- **PostgreSQL**: Relational database via Supabase.
+- **Supabase Storage**: Cloud-based file storage for resumes.
 
 ### AI & Parsing
 
-- **pdf2json**: PDF text extraction
-- **Google Gemini AI**: Advanced AI features (optional)
+- **pdf2json**: PDF text extraction.
+- **Google Gemini AI**: Advanced AI features (optional).
 
 ### Security
 
-- **Helmet.js**: Security headers
-- **Express Rate Limit**: DDoS protection
-- **HPP**: HTTP Parameter Pollution prevention
-- **CORS**: Cross-Origin Resource Sharing
+- **Helmet.js**: Security headers.
+- **Express Rate Limit**: DDoS protection.
+- **HPP**: HTTP Parameter Pollution prevention.
+- **CORS**: Cross-Origin Resource Sharing.
 
 ---
 
 ## Installation
+
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/your-username/placement-tracker.git
+    cd placement-tracker
+    ```
+
+2.  **Install dependencies:**
+    ```bash
+    npm install
+    ```
+
+---
+
+## Configuration
+
+The application requires a `.env` file in the root directory for configuration. Create this file and add the following environment variables.
+
+```env
+# Server Configuration
+PORT=3000
+NODE_ENV=development
+
+# JWT Configuration
+JWT_SECRET=your_jwt_secret_key_here
+JWT_EXPIRES_IN=90d
+
+# Database (Supabase PostgreSQL)
+# Get this from your Supabase project settings > Database > Connection string
+DATABASE_URL="postgresql://postgres:[YOUR-PASSWORD]@db.xxxxxxxx.supabase.co:5432/postgres"
+
+# Supabase Storage
+# Get these from your Supabase project settings > API
+SUPABASE_URL="https://xxxxxxxx.supabase.co"
+# IMPORTANT: Use the 'service_role' key for backend operations
+SUPABASE_SERVICE_ROLE_KEY="your_supabase_service_role_key"
+
+# Email Configuration (Optional, for password reset)
+EMAIL_HOST=smtp.example.com
+EMAIL_PORT=587
+EMAIL_USERNAME=your_email_username
+EMAIL_PASSWORD=your_email_password
+EMAIL_FROM="Your App <noreply@example.com>"
+```
+
+### Important Notes:
+
+-   **`SUPABASE_SERVICE_ROLE_KEY`**: For backend operations that require elevated privileges (like uploading files), you **must** use the `service_role` key, not the `anon` key.
+-   **Supabase Bucket**: Ensure you have a Supabase Storage bucket created. The application will first try to upload resumes to a bucket named `resumes`, and if that fails, it will try `resume`. It is recommended to create a bucket named `resumes` with public access for simplicity.
+
+---
+
+## Database Setup
+
+The application uses a PostgreSQL database hosted on Supabase. The necessary tables will be created automatically if they don't exist when the server starts.
+
+The core tables are:
+- `users`
+- `companies`
+- `internships`
+- `applications`
+- `skills`
+- `user_skills`
+
+The server will handle the initial schema setup.
+
+---
+
+## Running the Application
+
+Once you have configured your `.env` file, you can start the server:
+
+```bash
+npm start
+```
+
+The application will be available at `http://localhost:3000`.
+
+---
+
+## Troubleshooting
+
+-   **500 Error on Resume Upload**: This is almost always a configuration issue.
+    1.  **Check your `.env` file**: Ensure `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are correct.
+    2.  **Verify the Service Role Key**: Make sure you are using the `service_role` secret key, not the `anon` public key.
+    3.  **Check Bucket Name**: Confirm you have a storage bucket in Supabase named `resumes` or `resume`.
+    4.  **Check Bucket Policies**: Ensure your bucket policies are not blocking uploads. For initial setup, you can set a public-access policy.
+
+-   **Database Connection Issues**:
+    1.  Verify your `DATABASE_URL` in the `.env` file is correct.
+    2.  Ensure your machine's firewall is not blocking outbound connections on port 5432.
+
+---
+
+## Project Structure
+```
+/
+├── config/               # Configuration files (DB, Supabase, Email)
+├── controllers/          # Business logic (request handlers)
+├── middleware/           # Express middleware (auth, errors, uploads)
+├── public/               # Static frontend assets (HTML, CSS, JS)
+├── routes/               # API route definitions
+├── utils/                # Utility classes and functions
+├── .env                  # Environment variables (MUST be created)
+├── server.js             # Main application entry point
+└── package.json          # Project dependencies
+```
+
+---
+
+## Technical Documentation
+
+### API Endpoints
+
+All API endpoints are prefixed with `/api`. See the `routes/` directory for a full breakdown of available routes.
+
+-   `authRoutes.js`: User registration, login, password reset.
+-   `profileRoutes.js`: Profile management, resume upload.
+-   `companyRoutes.js`: Company information.
+-   `applicationRoutes.js`: Internship applications.
+-   `apiRoutes.js`: Main routes for internships and admin actions.
+
+### Authentication
+
+Authentication is handled using JSON Web Tokens (JWT). The `authMiddleware` protects routes that require a logged-in user. The token is sent in the `Authorization` header as a Bearer token.
+
+### Error Handling
+
+A global error handler in `middleware/errorMiddleware.js` catches all operational errors, logs them, and sends a structured JSON response to the client, preventing stack trace leaks in production.
+
 
 ### Prerequisites
 

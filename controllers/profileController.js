@@ -3,6 +3,16 @@ const supabase = require('../config/supabaseClient');
 const AppError = require('../utils/appError');
 const PDFParser = require("pdf2json");
 
+function getResumeBucketCandidates() {
+    const configuredBucket =
+        process.env.SUPABASE_STORAGE_BUCKET ||
+        process.env.SUPABASE_BUCKET ||
+        'resumes';
+
+    // Try configured bucket first, then common defaults.
+    return [...new Set([configuredBucket, 'resumes', 'resume'])];
+}
+
 exports.getProfile = async (req, res, next) => {
     try {
         const result = await pool.query(
@@ -68,22 +78,35 @@ exports.uploadResume = async (req, res, next) => {
     try {
         const fileName = `resume_${req.user.id}_${Date.now()}.pdf`;
 
-        const { data, error } = await supabase
-            .storage
-            .from('resumes')
-            .upload(fileName, req.file.buffer, {
-                contentType: 'application/pdf',
-                upsert: true
-            });
+        let uploadedBucket = null;
+        let lastStorageError = null;
 
-        if (error) {
-            console.error("❌ Supabase Storage Error:", error);
-            return next(new AppError('Storage upload failed', 500));
+        for (const bucket of getResumeBucketCandidates()) {
+            const { error } = await supabase
+                .storage
+                .from(bucket)
+                .upload(fileName, req.file.buffer, {
+                    contentType: 'application/pdf',
+                    upsert: true
+                });
+
+            if (!error) {
+                uploadedBucket = bucket;
+                break;
+            }
+
+            lastStorageError = error;
+            console.warn(`[SUPABASE] Upload failed for bucket "${bucket}":`, error.message || error);
+        }
+
+        if (!uploadedBucket) {
+            const reason = lastStorageError?.message || 'Unknown storage error';
+            return next(new AppError(`Storage upload failed: ${reason}`, 500));
         }
 
         const { data: urlData } = supabase
             .storage
-            .from('resumes')
+            .from(uploadedBucket)
             .getPublicUrl(fileName);
 
         const publicURL = urlData.publicUrl;

@@ -28,14 +28,15 @@ router.patch('/auth/update-password', authMiddleware, authController.updatePassw
 const optionalAuth = (req, res, next) => {
     const token = req.headers['authorization']?.split(' ')[1];
     if (token) {
-        return authMiddleware(req, res, next);
+        // Correctly call the 'protect' method from the imported middleware
+        return authMiddleware.protect(req, res, next);
     }
     next(); // Continue without auth if no token
 };
 router.get('/companies', optionalAuth, internshipController.getAllInternships);      // Legacy alias
 router.get('/internships', optionalAuth, internshipController.getAllInternships);     // Returns match ratios if user is authenticated
 router.get('/internships/search', internshipController.searchInternships);
-router.post('/internships', authMiddleware, internshipController.createInternship);
+router.post('/internships', authMiddleware.protect, internshipController.createInternship);
 
 // --- APPLICATION ROUTES ---
 router.post('/applications', authMiddleware, applicationController.apply);

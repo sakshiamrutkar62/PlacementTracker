@@ -1,10 +1,49 @@
+/**
+ * A wrapper around the fetch API that automatically adds the
+ * Authorization header for authenticated requests.
+ * @param {string} url The URL to fetch.
+ * @param {object} options The options for the fetch request.
+ * @returns {Promise<Response>}
+ */
+async function authenticatedFetch(url, options = {}) {
+    const token = localStorage.getItem('token');
+
+    // Prepare the headers, but be smart about FormData
+    const headers = { ...options.headers };
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    // If the body is FormData, DO NOT set Content-Type. The browser will do it.
+    if (!(options.body instanceof FormData)) {
+        headers['Content-Type'] = 'application/json';
+    }
+
+    // Build the final options object
+    const fetchOptions = {
+        ...options,
+        headers,
+    };
+
+    const response = await fetch(url, fetchOptions);
+
+    // If the token is invalid or expired, log the user out
+    if (response.status === 401) {
+        console.error('Authentication error. Logging out.');
+        logout(); // Assumes a logout function exists that clears localStorage and redirects
+        return Promise.reject(new Error('Unauthorized'));
+    }
+
+    return response;
+}
+
 // --- LOGIN LOGIC ---
 document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
     e.preventDefault();
-    
+
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
-    
+
     // UI Elements
     const btnText = document.getElementById('btnText');
     const loader = document.getElementById('loader');
@@ -19,14 +58,14 @@ document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password })
         });
-        
+
         const data = await response.json();
 
         if (response.ok) {
             // Success: Save Token
             localStorage.setItem('token', data.token);
             localStorage.setItem('user', JSON.stringify(data.user));
-            
+
             // Redirect based on role
             window.location.href = data.user.role === 'admin' ? 'admin.html' : 'dashboard.html';
         } else {
@@ -47,7 +86,7 @@ document.getElementById('registerForm')?.addEventListener('submit', async (e) =>
     const email = document.getElementById('regEmail').value;
     const password = document.getElementById('regPassword').value;
     const role = document.getElementById('regRole').value;
-    
+
     // UI Elements
     const btnText = document.getElementById('regBtnText');
     const loader = document.getElementById('regLoader');
@@ -61,7 +100,7 @@ document.getElementById('registerForm')?.addEventListener('submit', async (e) =>
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ full_name, email, password, role })
         });
-        
+
         const data = await response.json();
 
         if (response.ok) {
@@ -100,7 +139,7 @@ function showError(msg, btnText, loader, errorMsg, defaultText) {
     } else {
         alert(msg); // Fallback if no error element
     }
-    
+
     if (btnText) btnText.innerText = defaultText;
     if (loader) loader.classList.add('hidden');
 }

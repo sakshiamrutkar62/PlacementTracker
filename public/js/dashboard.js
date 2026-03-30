@@ -158,8 +158,8 @@ async function loadJobs() {
     try {
         // Fetch applications and jobs in parallel
         const [appsRes, jobsRes] = await Promise.all([
-            fetch(`${API_BASE_URL}/applications/my`, { headers: { 'Authorization': `Bearer ${token}` } }),
-            fetch(`${API_BASE_URL}/internships`, { headers: { 'Authorization': `Bearer ${token}` } })
+            authenticatedFetch(`${API_BASE_URL}/applications/my`),
+            authenticatedFetch(`${API_BASE_URL}/internships`)
         ]);
 
         const appsData = await appsRes.json();
@@ -425,9 +425,8 @@ async function applyJob(jobId) {
     if (!confirm('Are you sure you want to apply for this position?')) return;
 
     try {
-        const res = await fetch(`${API_BASE_URL}/applications`, {
+        const res = await authenticatedFetch(`${API_BASE_URL}/applications`, {
             method: 'POST',
-            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
             body: JSON.stringify({ company_id: jobId })
         });
         const data = await res.json();
@@ -502,9 +501,7 @@ async function loadApplications() {
     tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:2rem;color:#64748b;"><i class="fas fa-circle-notch fa-spin"></i> Loading...</td></tr>';
 
     try {
-        const res = await fetch(`${API_BASE_URL}/applications/my`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
+        const res = await authenticatedFetch(`${API_BASE_URL}/applications/my`);
         const responseData = await res.json();
         const apps = Array.isArray(responseData) ? responseData : (responseData.data || []);
 
@@ -555,9 +552,8 @@ function getStatusColor(status) { return getStatusInfo(status).bg; }
 async function withdrawApp(appId) {
     if (!confirm('Withdraw this application? This cannot be undone.')) return;
     try {
-        const res = await fetch(`${API_BASE_URL}/applications/${appId}`, {
-            method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${token}` }
+        const res = await authenticatedFetch(`${API_BASE_URL}/applications/${appId}`, {
+            method: 'DELETE'
         });
         if (res.ok || res.status === 204) {
             showToast('Application withdrawn.', 'info');
@@ -576,9 +572,7 @@ async function withdrawApp(appId) {
 // ==========================================
 async function loadDashboardStats() {
     try {
-        const res = await fetch(`${API_BASE_URL}/stats/dashboard`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
+        const res = await authenticatedFetch(`${API_BASE_URL}/stats/dashboard`);
         if (!res.ok) return;
         const { data } = await res.json();
 
@@ -619,9 +613,7 @@ async function loadProfile() {
 
     // Fetch latest from server in background
     try {
-        const res = await fetch(`${API_BASE_URL}/profile/me`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
+        const res = await authenticatedFetch(`${API_BASE_URL}/profile/me`);
         if (res.ok) {
             const json = await res.json();
             const data = json.data || json;
@@ -697,9 +689,8 @@ async function uploadResume() {
     uploadStatus.classList.remove('hidden');
 
     try {
-        const res = await fetch(`${API_BASE_URL}/profile/upload-resume`, {
+        const res = await authenticatedFetch(`${API_BASE_URL}/profile/upload-resume`, {
             method: 'POST',
-            headers: { 'Authorization': `Bearer ${token}` },
             body: formData
         });
         const data = await res.json();
@@ -750,9 +741,7 @@ function handleResumeDrop(event) {
 async function startVerification(skill) {
     // ── 24-hour cooldown check ──────────────────────────────────────────
     try {
-        const histRes = await fetch(`${API_BASE_URL}/skills/history`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
+        const histRes = await authenticatedFetch(`${API_BASE_URL}/skills/history`);
         if (histRes.ok) {
             const histData = await histRes.json();
             const attempts = Array.isArray(histData.data) ? histData.data : [];
@@ -792,9 +781,8 @@ async function startVerification(skill) {
     resultDiv.classList.add('hidden');
 
     try {
-        const res = await fetch(`${API_BASE_URL}/ai/quiz`, {
+        const res = await authenticatedFetch(`${API_BASE_URL}/ai/quiz`, {
             method: 'POST',
-            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
             body: JSON.stringify({ skill })
         });
         const data = await res.json();
@@ -951,9 +939,8 @@ async function fetchAIFeedback(skill, score, total) {
     text.innerText = 'Getting personalized feedback from AI...';
 
     try {
-        const res = await fetch(`${API_BASE_URL}/ai/feedback`, {
+        const res = await authenticatedFetch(`${API_BASE_URL}/ai/feedback`, {
             method: 'POST',
-            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
             body: JSON.stringify({ skill, score, total })
         });
         const data = await res.json();
@@ -969,9 +956,8 @@ async function fetchAIFeedback(skill, score, total) {
 
 async function saveVerification(score, passed) {
     const skill = currentQuizSkill;
-    const response = await fetch(`${API_BASE_URL}/skills/submit`, {
+    const response = await authenticatedFetch(`${API_BASE_URL}/skills/submit`, {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: currentUser.id, skill_name: skill, score, passed })
     });
 

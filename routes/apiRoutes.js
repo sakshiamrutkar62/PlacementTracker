@@ -20,8 +20,8 @@ router.post('/auth/register', authController.register);
 router.post('/auth/login', authController.login);
 router.post('/auth/forgot-password', authController.forgotPassword);
 router.post('/auth/reset-password', authController.resetPassword);
-router.get('/auth/me', authMiddleware, authController.getMe);
-router.patch('/auth/update-password', authMiddleware, authController.updatePassword);
+router.get('/auth/me', authMiddleware.protect, authController.getMe);
+router.patch('/auth/update-password', authMiddleware.protect, authController.updatePassword);
 
 // --- INTERNSHIP ROUTES ---
 // Apply optional auth - if authenticated, match ratios are included

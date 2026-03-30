@@ -14,7 +14,7 @@ function getResumeBucketCandidates() {
         'resumes';
 
     // Try configured bucket first, then common defaults.
-    return [...new Set([configuredBucket, 'resumes', 'resume'])];
+    return [...new Set([configuredBucket, 'resumes', 'resume', 'user-uploads', 'resume-storage', 'student-resumes'])];
 }
 
 exports.getProfile = async (req, res, next) => {

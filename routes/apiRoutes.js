@@ -39,34 +39,34 @@ router.get('/internships/search', internshipController.searchInternships);
 router.post('/internships', authMiddleware.protect, internshipController.createInternship);
 
 // --- APPLICATION ROUTES ---
-router.post('/applications', authMiddleware, applicationController.apply);
-router.get('/applications/my', authMiddleware, applicationController.myApplications);
-router.delete('/applications/:id', authMiddleware, applicationController.withdrawApplication);
+router.post('/applications', authMiddleware.protect, applicationController.apply);
+router.get('/applications/my', authMiddleware.protect, applicationController.myApplications);
+router.delete('/applications/:id', authMiddleware.protect, applicationController.withdrawApplication);
 
 // --- ADMIN ROUTES ---
-router.get('/applications/admin-view', authMiddleware, applicationController.getAllApplications);
-router.put('/applications/:id/status', authMiddleware, applicationController.updateStatus);
+router.get('/applications/admin-view', authMiddleware.protect, applicationController.getAllApplications);
+router.put('/applications/:id/status', authMiddleware.protect, applicationController.updateStatus);
 
 // --- STATS ---
-router.get('/stats/dashboard', authMiddleware, applicationController.getDashboardStats);
+router.get('/stats/dashboard', authMiddleware.protect, applicationController.getDashboardStats);
 
 // --- PROFILE ROUTES ---
-router.get('/profile/me', authMiddleware, profileController.getProfile);
-router.post('/profile/upload-resume', authMiddleware, upload.single('resume'), profileController.uploadResume);
+router.get('/profile/me', authMiddleware.protect, profileController.getProfile);
+router.post('/profile/upload-resume', authMiddleware.protect, upload.single('resume'), profileController.uploadResume);
 
 // --- AI ROUTES ---
 router.post('/ai/quiz', aiController.generateQuiz);
 router.post('/ai/feedback', aiController.getFeedback);
-router.post('/ai/skill-gap', authMiddleware, aiController.getSkillGap);
+router.post('/ai/skill-gap', authMiddleware.protect, aiController.getSkillGap);
 
 // --- SKILL ROUTES ---
-router.post('/skills/submit', authMiddleware, skillController.submitQuiz);
-router.get('/skills/history', authMiddleware, skillController.getQuizHistory);
+router.post('/skills/submit', authMiddleware.protect, skillController.submitQuiz);
+router.get('/skills/history', authMiddleware.protect, skillController.getQuizHistory);
 
 // --- ADMIN STUDENT MANAGEMENT ---
-router.get('/admin/students', authMiddleware, adminController.listStudents);
-router.get('/admin/rankings', authMiddleware, adminController.getStudentRankings);
-router.put('/admin/students/:id/verify', authMiddleware, adminController.verifyStudent);
-router.post('/admin/applications', authMiddleware, adminController.createApplicationForStudent);
+router.get('/admin/students', authMiddleware.protect, adminController.listStudents);
+router.get('/admin/rankings', authMiddleware.protect, adminController.getStudentRankings);
+router.put('/admin/students/:id/verify', authMiddleware.protect, adminController.verifyStudent);
+router.post('/admin/applications', authMiddleware.protect, adminController.createApplicationForStudent);
 
 module.exports = router;

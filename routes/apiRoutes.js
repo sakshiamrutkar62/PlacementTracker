@@ -26,12 +26,10 @@ router.patch('/auth/update-password', authMiddleware.protect, authController.upd
 // --- INTERNSHIP ROUTES ---
 // Apply optional auth - if authenticated, match ratios are included
 const optionalAuth = (req, res, next) => {
-    const token = req.headers['authorization']?.split(' ')[1];
-    if (token) {
-        // Correctly call the 'protect' method from the imported middleware
-        return authMiddleware.protect(req, res, next);
-    }
-    next(); // Continue without auth if no token
+    // This middleware now correctly uses optionalProtect for optional authentication.
+    // If a valid token is provided, req.user will be set.
+    // If the token is invalid or missing, the request proceeds without authentication.
+    return authMiddleware.optionalProtect(req, res, next);
 };
 router.get('/companies', optionalAuth, internshipController.getAllInternships);      // Legacy alias
 router.get('/internships', optionalAuth, internshipController.getAllInternships);     // Returns match ratios if user is authenticated

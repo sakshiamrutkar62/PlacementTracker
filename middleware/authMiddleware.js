@@ -49,3 +49,21 @@ exports.restrictTo = (...roles) => {
         next();
     };
 };
+
+exports.optionalProtect = async (req, res, next) => {
+    let token;
+    try {
+        token = req.headers['authorization']?.split(' ')[1];
+        if (token) {
+            const decoded = jwt.verify(token, JWT_SECRET);
+            const currentUser = await User.findByPk(decoded.id);
+            if (currentUser) {
+                req.user = currentUser; // Attach user if token is valid
+            }
+        }
+    } catch (err) {
+        // If token is invalid or expired, just ignore and proceed without authentication
+        // The user will be treated as a guest
+    }
+    next(); // Always proceed
+};

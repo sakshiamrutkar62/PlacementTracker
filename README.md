@@ -103,6 +103,7 @@ The Smart Student Placement Manager is an enterprise-grade web application desig
 ## Installation
 
 1.  **Clone the repository:**
+
     ```bash
     git clone https://github.com/your-username/placement-tracker.git
     cd placement-tracker
@@ -148,8 +149,8 @@ EMAIL_FROM="Your App <noreply@example.com>"
 
 ### Important Notes:
 
--   **`SUPABASE_SERVICE_ROLE_KEY`**: For backend operations that require elevated privileges (like uploading files), you **must** use the `service_role` key, not the `anon` key.
--   **Supabase Bucket**: Ensure you have a Supabase Storage bucket created. The application will first try to upload resumes to a bucket named `resumes`, and if that fails, it will try `resume`. It is recommended to create a bucket named `resumes` with public access for simplicity.
+- **`SUPABASE_SERVICE_ROLE_KEY`**: For backend operations that require elevated privileges (like uploading files), you **must** use the `service_role` key, not the `anon` key.
+- **Supabase Bucket**: Ensure you have a Supabase Storage bucket created. The application will first try to upload resumes to a bucket named `resumes`, and if that fails, it will try `resume`. It is recommended to create a bucket named `resumes` with public access for simplicity.
 
 ---
 
@@ -158,6 +159,7 @@ EMAIL_FROM="Your App <noreply@example.com>"
 The application uses a PostgreSQL database hosted on Supabase. The necessary tables will be created automatically if they don't exist when the server starts.
 
 The core tables are:
+
 - `users`
 - `companies`
 - `internships`
@@ -183,19 +185,20 @@ The application will be available at `http://localhost:3000`.
 
 ## Troubleshooting
 
--   **500 Error on Resume Upload**: This is almost always a configuration issue.
-    1.  **Check your `.env` file**: Ensure `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are correct.
-    2.  **Verify the Service Role Key**: Make sure you are using the `service_role` secret key, not the `anon` public key.
-    3.  **Check Bucket Name**: Confirm you have a storage bucket in Supabase named `resumes` or `resume`.
-    4.  **Check Bucket Policies**: Ensure your bucket policies are not blocking uploads. For initial setup, you can set a public-access policy.
+- **500 Error on Resume Upload**: This is almost always a configuration issue.
+  1.  **Check your `.env` file**: Ensure `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are correct.
+  2.  **Verify the Service Role Key**: Make sure you are using the `service_role` secret key, not the `anon` public key.
+  3.  **Check Bucket Name**: Confirm you have a storage bucket in Supabase named `resumes` or `resume`.
+  4.  **Check Bucket Policies**: Ensure your bucket policies are not blocking uploads. For initial setup, you can set a public-access policy.
 
--   **Database Connection Issues**:
-    1.  Verify your `DATABASE_URL` in the `.env` file is correct.
-    2.  Ensure your machine's firewall is not blocking outbound connections on port 5432.
+- **Database Connection Issues**:
+  1.  Verify your `DATABASE_URL` in the `.env` file is correct.
+  2.  Ensure your machine's firewall is not blocking outbound connections on port 5432.
 
 ---
 
 ## Project Structure
+
 ```
 /
 ├── config/               # Configuration files (DB, Supabase, Email)
@@ -217,11 +220,11 @@ The application will be available at `http://localhost:3000`.
 
 All API endpoints are prefixed with `/api`. See the `routes/` directory for a full breakdown of available routes.
 
--   `authRoutes.js`: User registration, login, password reset.
--   `profileRoutes.js`: Profile management, resume upload.
--   `companyRoutes.js`: Company information.
--   `applicationRoutes.js`: Internship applications.
--   `apiRoutes.js`: Main routes for internships and admin actions.
+- `authRoutes.js`: User registration, login, password reset.
+- `profileRoutes.js`: Profile management, resume upload.
+- `companyRoutes.js`: Company information.
+- `applicationRoutes.js`: Internship applications.
+- `apiRoutes.js`: Main routes for internships and admin actions.
 
 ### Authentication
 
@@ -230,7 +233,6 @@ Authentication is handled using JSON Web Tokens (JWT). The `authMiddleware` prot
 ### Error Handling
 
 A global error handler in `middleware/errorMiddleware.js` catches all operational errors, logs them, and sends a structured JSON response to the client, preventing stack trace leaks in production.
-
 
 ### Prerequisites
 

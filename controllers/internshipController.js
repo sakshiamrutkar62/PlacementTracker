@@ -2,38 +2,48 @@ const { getJobsWithMatchRatios, calculateMatchRatio } = require('../utils/skillM
 const pool = require('../config/db');
 const supabase = require('../config/supabaseClient');
 require('dotenv').config();
+const { Internship } = require('../models');
+const AppError = require('../utils/appError');
 
 // 1. POST A NEW INTERNSHIP (Admin Only)
-exports.createInternship = async (req, res) => {
-    const { company_name, role_title, description, stipend, duration, mode, type, location, required_skills, deadline } = req.body;
-
-    // Validation
-    if (!company_name || !role_title) {
-        return res.status(400).json({ error: "Company name and role title are required." });
+exports.createInternship = async (req, res, next) => {
+    if (req.user.role !== 'admin') {
+        return next(new AppError('You do not have permission to perform this action', 403));
     }
+    try {
+        const { company_name, role_title, description, stipend, duration, mode, type, location, required_skills, deadline } = req.body;
 
-    const skillsArray = Array.isArray(required_skills)
-        ? required_skills
-        : (required_skills ? String(required_skills).split(',').map(s => s.trim()).filter(Boolean) : []);
+        // Validation
+        if (!company_name || !role_title) {
+            return res.status(400).json({ error: "Company name and role title are required." });
+        }
 
-    const { data, error } = await supabase
-        .from('internships')
-        .insert([{
-            company_name,
-            role_title,
-            description,
-            stipend,
-            duration,
-            mode,
-            type: type || 'Internship',
-            location,
-            required_skills: skillsArray,
-            deadline
-        }]);
+        const skillsArray = Array.isArray(required_skills)
+            ? required_skills
+            : (required_skills ? String(required_skills).split(',').map(s => s.trim()).filter(Boolean) : []);
 
-    if (error) return res.status(400).json({ error: error.message });
+        const { data, error } = await supabase
+            .from('internships')
+            .insert([{
+                company_name,
+                role_title,
+                description,
+                stipend,
+                duration,
+                mode,
+                type: type || 'Internship',
+                location,
+                required_skills: skillsArray,
+                deadline
+            }]);
 
-    res.status(201).json({ message: "Internship posted successfully!", data });
+        if (error) return res.status(400).json({ error: error.message });
+
+        res.status(201).json({ message: "Internship posted successfully!", data });
+    } catch (err) {
+        console.error('Error creating internship:', err.message);
+        next(err);
+    }
 };
 
 // 2. GET ALL INTERNSHIPS (With Filtering Support)

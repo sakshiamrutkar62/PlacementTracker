@@ -1,3 +1,7 @@
+const { User, Skill, UserSkill, Internship } = require('../models');
+const { Op } = require('sequelize');
+const path = require('path');
+const logger = require('../utils/logger');
 const pool = require('../config/db');
 const supabase = require('../config/supabaseClient');
 const AppError = require('../utils/appError');
@@ -27,125 +31,117 @@ exports.getProfile = async (req, res, next) => {
 };
 
 exports.uploadResume = async (req, res, next) => {
-    // 1. Check File
     if (!req.file) return next(new AppError('No file uploaded', 400));
 
-    // --- AI PARSING ---
-    const parsePDF = (buffer) => {
-        return new Promise((resolve, reject) => {
-            const pdfParser = new PDFParser(null, 1); // FIX: use null not this
-            pdfParser.on("pdfParser_dataError", errData => reject(errData.parserError));
-            pdfParser.on("pdfParser_dataReady", pdfData => {
-                const rawText = pdfParser.getRawTextContent();
-                try { resolve(decodeURIComponent(rawText)); }
-                catch (e) { resolve(rawText); }
+    try {
+        const fileBuffer = req.file.buffer;
+        const fileName = `${req.user.id}-${Date.now()}${path.extname(req.file.originalname)}`;
+
+        let extractedSkills = [];
+        try {
+            const pdfParser = new PDFParser(this, 1);
+            pdfParser.parseBuffer(fileBuffer);
+            const pdfData = await new Promise((resolve, reject) => {
+                pdfParser.on("pdfParser_dataError", errData => reject(errData.parserError));
+                pdfParser.on("pdfParser_dataReady", pdfData => resolve(pdfData));
             });
-            pdfParser.parseBuffer(buffer);
-        });
-    };
+            const pdfText = pdfData.Pages.map(page => page.Texts.map(text => decodeURIComponent(text.R[0].T)).join(" ")).join(" ");
 
-    let foundSkills = [];
-    try {
-        const resumeTextRaw = await parsePDF(req.file.buffer);
-        const resumeText = (resumeTextRaw || "").toLowerCase();
+            const allSkills = await Skill.findAll({ attributes: ['id', 'name'] });
+            const skillNames = allSkills.map(s => s.name.toLowerCase());
 
-        // Expanded skill dictionary for better detection
-        const possibleSkills = [
-            'python', 'java', 'javascript', 'typescript', 'react', 'reactjs', 'angular',
-            'vue', 'vuejs', 'node', 'nodejs', 'express', 'sql', 'mysql', 'postgresql',
-            'mongodb', 'redis', 'aws', 'azure', 'gcp', 'docker', 'kubernetes', 'git',
-            'html', 'css', 'sass', 'tailwind', 'bootstrap', 'excel', 'cpp', 'c++',
-            'c#', 'golang', 'go', 'rust', 'swift', 'kotlin', 'php', 'laravel',
-            'django', 'flask', 'fastapi', 'spring', 'springboot', 'graphql', 'rest',
-            'power bi', 'tableau', 'dotnet', '.net', 'machine learning', 'deep learning',
-            'data analysis', 'data science', 'tensorflow', 'pytorch', 'scikit',
-            'cybersecurity', 'penetration testing', 'blockchain', 'solidity', 'iot',
-            'linux', 'bash', 'shell', 'jenkins', 'ci/cd', 'devops', 'agile', 'scrum',
-            'figma', 'photoshop', 'ui/ux', 'flutter', 'dart', 'react native', "compiler constructor"
-        ];
+            extractedSkills = allSkills.filter(skill =>
+                new RegExp(`\\b${skill.name.toLowerCase()}\\b`, 'i').test(pdfText)
+            ).map(skill => skill.name);
 
-        foundSkills = possibleSkills.filter(skill => resumeText.includes(skill));
-        // Normalize: remove duplicates like 'node' and 'nodejs'
-        foundSkills = [...new Set(foundSkills)];
-        // Capitalize for display
-        foundSkills = foundSkills.map(s => s.charAt(0).toUpperCase() + s.slice(1));
-    } catch (parseErr) {
-        console.warn("⚠️ PDF Parsing failed (Non-fatal):", parseErr);
-    }
-    // -----------------------------------------
+            await UserSkill.destroy({ where: { userId: req.user.id } });
+            if (extractedSkills.length > 0) {
+                const skillsFromDb = await Skill.findAll({ where: { name: extractedSkills } });
+                const skillsToInsert = skillsFromDb.map(s => ({ userId: req.user.id, skillId: s.id }));
+                if (skillsToInsert.length > 0) {
+                    await UserSkill.bulkCreate(skillsToInsert, { ignoreDuplicates: true });
+                }
+            }
+        } catch (parseError) {
+            logger.error('PDF parsing error:', parseError);
+            return res.status(400).json({ message: 'Failed to parse PDF file. It may be corrupted or in an unsupported format.' });
+        }
 
-    // 2. Upload to Supabase Storage
-    try {
-        const fileName = `resume_${req.user.id}_${Date.now()}.pdf`;
+        const bucketCandidates = getResumeBucketCandidates();
+        let uploadError = null;
+        let publicURL = null;
+        let bucketUsed = null;
 
-        let uploadedBucket = null;
-        let lastStorageError = null;
-
-        for (const bucket of getResumeBucketCandidates()) {
-            const { error } = await supabase
+        for (const bucket of bucketCandidates) {
+            const { data, error } = await supabase
                 .storage
                 .from(bucket)
-                .upload(fileName, req.file.buffer, {
+                .upload(fileName, fileBuffer, {
                     contentType: 'application/pdf',
                     upsert: true
                 });
 
             if (!error) {
-                uploadedBucket = bucket;
+                uploadError = null;
+                bucketUsed = bucket;
                 break;
             }
 
-            lastStorageError = error;
-            console.warn(`[SUPABASE] Upload failed for bucket "${bucket}":`, error.message || error);
+            uploadError = error;
+            logger.warn(`[SUPABASE] Upload failed for bucket "${bucket}":`, error.message || error);
         }
 
-        if (!uploadedBucket) {
-            const reason = lastStorageError?.message || 'Unknown storage error';
-            return next(new AppError(`Storage upload failed: ${reason}`, 500));
+        if (uploadError) {
+            logger.error('All Supabase bucket uploads failed.', uploadError);
+            return next(new AppError(`Storage upload failed: ${uploadError.message}`, 500));
         }
 
         const { data: urlData } = supabase
             .storage
-            .from(uploadedBucket)
+            .from(bucketUsed)
             .getPublicUrl(fileName);
 
-        const publicURL = urlData.publicUrl;
+        publicURL = urlData.publicUrl;
 
-        // 3. SAVE RESUME LINK AND SKILLS TO DB
-        // Fetch current verified_skills so we can cross-reference with new resume skills
-        const { rows: [userRow] } = await pool.query('SELECT verified_skills FROM users WHERE id = $1', [req.user.id]);
-        const existingVerified = Array.isArray(userRow?.verified_skills) ? userRow.verified_skills : [];
-        // Only keep verified skills that still appear in the new resume — prevents cross-resume contamination
-        const newFoundLower = foundSkills.map(s => s.toLowerCase());
+        const user = await User.findByPk(req.user.id);
+        if (!user) {
+            return next(new AppError('User not found', 404));
+        }
+
+        const existingVerified = Array.isArray(user.verified_skills) ? user.verified_skills : [];
+        const newFoundLower = extractedSkills.map(s => s.toLowerCase());
         const cleanedVerified = existingVerified.filter(v => newFoundLower.includes(v.toLowerCase()));
 
-        await pool.query(
-            'UPDATE users SET resume_link = $1, skills = $2, verified_skills = $3 WHERE id = $4',
-            [publicURL, foundSkills, cleanedVerified, req.user.id]
-        );
+        user.resume_link = publicURL;
+        user.skills = extractedSkills;
+        user.verified_skills = cleanedVerified;
+        await user.save();
 
-        // 4. Match Jobs (Immediate Feedback) - Fixed to use internships table
         let matchedJobs = [];
-        if (foundSkills.length > 0) {
-            const lowerSkills = foundSkills.map(s => s.toLowerCase());
-            const conditions = lowerSkills.map((_, i) => `$${i + 1} = ANY(required_skills)`).join(' OR ');
-            const jobResult = await pool.query(
-                `SELECT id, company_name, role_title, stipend, type FROM internships WHERE ${conditions} ORDER BY posted_at DESC LIMIT 5`,
-                lowerSkills
-            );
-            matchedJobs = jobResult.rows;
+        if (extractedSkills.length > 0) {
+            const lowerSkills = extractedSkills.map(s => s.toLowerCase());
+
+            matchedJobs = await Internship.findAll({
+                where: {
+                    required_skills: {
+                        [Op.overlap]: lowerSkills
+                    }
+                },
+                limit: 5,
+                order: [['posted_at', 'DESC']]
+            });
         }
 
         res.json({
             status: 'success',
             message: 'Resume uploaded successfully!',
             resume_url: publicURL,
-            skills_identified: foundSkills,
+            skills_identified: extractedSkills,
             recommended_jobs: matchedJobs
         });
 
     } catch (err) {
-        console.error("❌ Server Error:", err);
+        logger.error("Server Error in uploadResume:", err);
         next(err);
     }
 };

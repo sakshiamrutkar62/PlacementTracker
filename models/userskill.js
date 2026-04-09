@@ -10,9 +10,13 @@ module.exports = (sequelize, DataTypes) => {
         }
     }
     UserSkill.init({
-        userId: {
-            type: DataTypes.UUID,
+        id: {
+            type: DataTypes.BIGINT,
             primaryKey: true,
+            autoIncrement: true
+        },
+        userId: {
+            type: DataTypes.BIGINT,
             field: 'user_id',
             references: {
                 model: 'users',
@@ -21,7 +25,6 @@ module.exports = (sequelize, DataTypes) => {
         },
         skillId: {
             type: DataTypes.BIGINT,
-            primaryKey: true,
             field: 'skill_id',
             references: {
                 model: 'skills',

@@ -10,6 +10,11 @@ module.exports = (sequelize, DataTypes) => {
         }
     }
     Internship.init({
+        id: {
+            type: DataTypes.BIGINT,
+            primaryKey: true,
+            autoIncrement: true
+        },
         company_name: DataTypes.STRING,
         role_title: DataTypes.STRING,
         description: DataTypes.TEXT,

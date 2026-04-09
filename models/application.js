@@ -10,6 +10,11 @@ module.exports = (sequelize, DataTypes) => {
         }
     }
     Application.init({
+        id: {
+            type: DataTypes.BIGINT,
+            primaryKey: true,
+            autoIncrement: true
+        },
         status: {
             type: DataTypes.STRING,
             defaultValue: 'applied'
@@ -21,7 +26,7 @@ module.exports = (sequelize, DataTypes) => {
             defaultValue: DataTypes.NOW
         },
         userId: {
-            type: DataTypes.UUID,
+            type: DataTypes.BIGINT,
             allowNull: false,
             field: 'user_id',
             references: {
@@ -30,7 +35,7 @@ module.exports = (sequelize, DataTypes) => {
             }
         },
         internshipId: {
-            type: DataTypes.UUID,
+            type: DataTypes.BIGINT,
             allowNull: false,
             field: 'internship_id',
             references: {

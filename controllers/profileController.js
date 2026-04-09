@@ -137,8 +137,8 @@ exports.uploadResume = async (req, res, next) => {
         }
 
         if (uploadError) {
-            logger.error('All Supabase bucket uploads failed.', uploadError);
-            return next(new AppError(`Storage upload failed: ${uploadError.message}`, 500));
+            logger.error('All Supabase bucket uploads failed. Possible causes: 1. Bucket "resumes" does not exist. 2. Service role key is wrong. 3. Bucket permissions/RLS blocking upload.', uploadError);
+            return next(new AppError(`Storage upload failed: ${uploadError.message || 'Check Supabase bucket existence and permissions.'}`, 500));
         }
 
         const { data: urlData } = supabase
@@ -146,11 +146,17 @@ exports.uploadResume = async (req, res, next) => {
             .from(bucketUsed)
             .getPublicUrl(fileName);
 
+        if (!urlData || !urlData.publicUrl) {
+            logger.error(`[SUPABASE] Could not get public URL for bucket: ${bucketUsed}`);
+            return next(new AppError('Failed to generate resume URL', 500));
+        }
+
         publicURL = urlData.publicUrl;
 
         const user = await User.findByPk(req.user.id);
         if (!user) {
-            return next(new AppError('User not found', 404));
+            logger.error(`[UPLOAD ERROR] User ${req.user.id} not found in database during resume update`);
+            return next(new AppError('User not found during profile update', 404));
         }
 
         const existingVerified = Array.isArray(user.verified_skills) ? user.verified_skills : [];
@@ -160,7 +166,13 @@ exports.uploadResume = async (req, res, next) => {
         user.resume_link = publicURL;
         user.skills = extractedSkills;
         user.verified_skills = cleanedVerified;
-        await user.save();
+        
+        try {
+            await user.save();
+        } catch (saveError) {
+            logger.error('[DATABASE ERROR] Failed to save user profile with resume details:', saveError);
+            return next(new AppError('Resume uploaded but failed to update profile in database.', 500));
+        }
 
         let matchedJobs = [];
         if (extractedSkills.length > 0) {

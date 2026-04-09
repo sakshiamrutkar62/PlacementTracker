@@ -10,6 +10,11 @@ module.exports = (sequelize, DataTypes) => {
         }
     }
     User.init({
+        id: {
+            type: DataTypes.BIGINT,
+            primaryKey: true,
+            autoIncrement: true
+        },
         full_name: {
             type: DataTypes.STRING,
             allowNull: false,
@@ -35,8 +40,8 @@ module.exports = (sequelize, DataTypes) => {
             defaultValue: 'student',
         },
         resume_link: DataTypes.STRING,
-        skills: DataTypes.JSONB, // Using JSONB for array of strings
-        verified_skills: DataTypes.JSONB,
+        skills: DataTypes.ARRAY(DataTypes.STRING), // Changed from JSONB to ARRAY
+        verified_skills: DataTypes.ARRAY(DataTypes.STRING), // Changed from JSONB to ARRAY
         batch_year: DataTypes.INTEGER,
         college_verified: {
             type: DataTypes.BOOLEAN,

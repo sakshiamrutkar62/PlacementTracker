@@ -8,6 +8,7 @@ require('dotenv').config();
 // IMPORT THE NEW UNIFIED ROUTE FILE (From Phase 2)
 const apiRoutes = require('./routes/apiRoutes');
 const globalErrorHandler = require('./middleware/errorMiddleware');
+const db = require('./models'); // Import Sequelize DB models
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -68,7 +69,17 @@ process.on('unhandledRejection', (err) => {
 });
 
 // --- START SERVER ---
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
+    try {
+        await db.sequelize.authenticate();
+        console.log('[INFO] Database Connection established successfully.');
+        // This ensures your models match the database schema automatically
+        await db.sequelize.sync({ alter: true });
+        console.log('[INFO] Database Models synchronized.');
+    } catch (err) {
+        console.error('[ERROR] Database sync failed:', err.message);
+    }
+
     console.log(`[INFO] ENTERPRISE SERVER running on port ${PORT}`);
     console.log(`[INFO] API Ready at http://localhost:${PORT}/api`);
 });

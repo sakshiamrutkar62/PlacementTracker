@@ -29,7 +29,8 @@ app.use(limiter);
 // --- 2. MIDDLEWARE ---
 app.use(helmet({ contentSecurityPolicy: false })); // Security headers (CSP disabled to allow inline scripts in public HTML)
 app.use(cors());
-app.use(express.json()); // Parses incoming JSON requests
+app.use(express.json({ limit: '15mb' })); // Increased limit for file uploads (base64 encoded)
+app.use(express.urlencoded({ limit: '15mb', extended: true })); // For form data
 app.use(express.static(path.join(__dirname, 'public'))); // Serves your Frontend (HTML/CSS/JS)
 
 // --- 3. ROUTES (The Brain Upgrade) ---

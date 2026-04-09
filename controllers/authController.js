@@ -59,7 +59,8 @@ exports.login = async (req, res, next) => {
 
         // If user has password in legacy 'password' column, migrate it to password_hash
         if (user.password && !user.password_hash) {
-            await pool.query('UPDATE users SET password_hash = $1, password = NULL WHERE id = $2', [user.password, user.id]);
+            const hashedPassword = await bcrypt.hash(password, 10);
+            await pool.query('UPDATE users SET password_hash = $1, password = NULL WHERE id = $2', [hashedPassword, user.id]);
         }
 
         const token = jwt.sign({ id: user.id, role: user.role, email: user.email }, SECRET_KEY, { expiresIn: '7d' });

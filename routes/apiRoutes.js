@@ -4,7 +4,12 @@ const multer = require('multer');
 
 // Middleware
 const authMiddleware = require('../middleware/authMiddleware'); // Ensure this file exists
-const upload = multer({ storage: multer.memoryStorage() }); // Handles PDF uploads in memory
+const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: {
+        fileSize: 10 * 1024 * 1024 // 10MB limit for file uploads
+    }
+});
 
 // Controllers
 const internshipController = require('../controllers/internshipController');

@@ -38,21 +38,66 @@ exports.uploadResume = async (req, res, next) => {
         const fileName = `${req.user.id}-${Date.now()}${path.extname(req.file.originalname)}`;
 
         let extractedSkills = [];
+        let pdfText = '';
+        
+        // Parse PDF using pdf2json (suppress console warnings)
         try {
-            const pdfParser = new PDFParser(this, 1);
-            pdfParser.parseBuffer(fileBuffer);
-            const pdfData = await new Promise((resolve, reject) => {
-                pdfParser.on("pdfParser_dataError", errData => reject(errData.parserError));
-                pdfParser.on("pdfParser_dataReady", pdfData => resolve(pdfData));
+            // Temporarily suppress console.warn to hide "fake worker" warning
+            const originalWarn = console.warn;
+            console.warn = () => {};
+            
+            const pdfParser = new PDFParser(null, 1);
+            
+            await new Promise((resolve, reject) => {
+                pdfParser.on("pdfParser_dataError", errData => reject(new Error(errData.parserError)));
+                pdfParser.on("pdfParser_dataReady", pdfData => {
+                    try {
+                        pdfText = pdfData.Pages.map(page => 
+                            page.Texts.map(text => decodeURIComponent(text.R[0].T)).join(" ")
+                        ).join(" ");
+                        resolve();
+                    } catch (err) {
+                        reject(err);
+                    }
+                });
+                
+                pdfParser.parseBuffer(fileBuffer);
             });
-            const pdfText = pdfData.Pages.map(page => page.Texts.map(text => decodeURIComponent(text.R[0].T)).join(" ")).join(" ");
+            
+            // Restore console.warn
+            console.warn = originalWarn;
+            
+            logger.info(`PDF parsed successfully - ${pdfText.length} characters extracted`);
+            logger.info('PDF text preview:', pdfText.substring(0, 500));
+        } catch (parseError) {
+            logger.error('PDF parsing failed:', parseError);
+            return res.status(400).json({ 
+                message: 'Failed to parse PDF file. Please ensure it is a valid, unencrypted PDF.' 
+            });
+        }
 
+        // Extract skills from parsed text
+        try {
             const allSkills = await Skill.findAll({ attributes: ['id', 'name'] });
-            const skillNames = allSkills.map(s => s.name.toLowerCase());
 
-            extractedSkills = allSkills.filter(skill =>
-                new RegExp(`\\b${skill.name.toLowerCase()}\\b`, 'i').test(pdfText)
-            ).map(skill => skill.name);
+            // Helper function to escape special regex characters
+            const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+            extractedSkills = allSkills.filter(skill => {
+                const escapedSkill = escapeRegex(skill.name);
+                // Use case-insensitive search with word boundaries or spaces around skill
+                // For skills with special chars (C++, C#), also check without word boundaries
+                const hasSpecialChars = /[+#.]/.test(skill.name);
+                
+                if (hasSpecialChars) {
+                    // For C++, C#, Node.js - match with spaces/start/end around them
+                    const pattern = `(^|\\s)${escapedSkill}(\\s|$|\\.|,)`;
+                    return new RegExp(pattern, 'i').test(pdfText);
+                } else {
+                    // For regular words, use word boundaries
+                    return new RegExp(`\\b${escapedSkill}\\b`, 'i').test(pdfText);
+                }
+            }).map(skill => skill.name);
 
             await UserSkill.destroy({ where: { userId: req.user.id } });
             if (extractedSkills.length > 0) {
@@ -62,9 +107,9 @@ exports.uploadResume = async (req, res, next) => {
                     await UserSkill.bulkCreate(skillsToInsert, { ignoreDuplicates: true });
                 }
             }
-        } catch (parseError) {
-            logger.error('PDF parsing error:', parseError);
-            return res.status(400).json({ message: 'Failed to parse PDF file. It may be corrupted or in an unsupported format.' });
+        } catch (skillError) {
+            logger.error('Skill extraction error:', skillError);
+            // Continue even if skill extraction fails - still upload the resume
         }
 
         const bucketCandidates = getResumeBucketCandidates();

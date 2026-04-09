@@ -158,8 +158,8 @@ async function loadJobs() {
     try {
         // Fetch applications and jobs in parallel
         const [appsRes, jobsRes] = await Promise.all([
-            authenticatedFetch(`${API_BASE_URL}/applications/my`),
-            authenticatedFetch(`${API_BASE_URL}/internships`)
+            authenticatedFetch(`/applications/my`),
+            authenticatedFetch(`/internships`)
         ]);
 
         const appsData = await appsRes.json();
@@ -425,7 +425,7 @@ async function applyJob(jobId) {
     if (!confirm('Are you sure you want to apply for this position?')) return;
 
     try {
-        const res = await authenticatedFetch(`${API_BASE_URL}/applications`, {
+        const res = await authenticatedFetch(`/applications`, {
             method: 'POST',
             body: JSON.stringify({ company_id: jobId })
         });
@@ -501,7 +501,7 @@ async function loadApplications() {
     tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:2rem;color:#64748b;"><i class="fas fa-circle-notch fa-spin"></i> Loading...</td></tr>';
 
     try {
-        const res = await authenticatedFetch(`${API_BASE_URL}/applications/my`);
+        const res = await authenticatedFetch(`/applications/my`);
         const responseData = await res.json();
         const apps = Array.isArray(responseData) ? responseData : (responseData.data || []);
 
@@ -552,7 +552,7 @@ function getStatusColor(status) { return getStatusInfo(status).bg; }
 async function withdrawApp(appId) {
     if (!confirm('Withdraw this application? This cannot be undone.')) return;
     try {
-        const res = await authenticatedFetch(`${API_BASE_URL}/applications/${appId}`, {
+        const res = await authenticatedFetch(`/applications/${appId}`, {
             method: 'DELETE'
         });
         if (res.ok || res.status === 204) {
@@ -572,7 +572,7 @@ async function withdrawApp(appId) {
 // ==========================================
 async function loadDashboardStats() {
     try {
-        const res = await authenticatedFetch(`${API_BASE_URL}/stats/dashboard`);
+        const res = await authenticatedFetch(`/stats/dashboard`);
         if (!res.ok) return;
         const { data } = await res.json();
 
@@ -613,7 +613,7 @@ async function loadProfile() {
 
     // Fetch latest from server in background
     try {
-        const res = await authenticatedFetch(`${API_BASE_URL}/profile/me`);
+        const res = await authenticatedFetch(`/profile/me`);
         if (res.ok) {
             const json = await res.json();
             const data = json.data || json;
@@ -679,7 +679,7 @@ async function uploadResume() {
     const file = fileInput.files[0];
     if (!file) return;
     if (file.type !== 'application/pdf') { showToast('Please upload a PDF file only.', 'warning'); return; }
-    if (file.size > 5 * 1024 * 1024) { showToast('File too large. Max 5MB.', 'warning'); return; }
+    if (file.size > 10 * 1024 * 1024) { showToast('File too large. Max 10MB.', 'warning'); return; }
 
     const formData = new FormData();
     formData.append('resume', file);
@@ -689,7 +689,7 @@ async function uploadResume() {
     uploadStatus.classList.remove('hidden');
 
     try {
-        const res = await authenticatedFetch(`${API_BASE_URL}/profile/upload-resume`, {
+        const res = await authenticatedFetch(`/profile/upload-resume`, {
             method: 'POST',
             body: formData
         });
@@ -741,7 +741,7 @@ function handleResumeDrop(event) {
 async function startVerification(skill) {
     // ── 24-hour cooldown check ──────────────────────────────────────────
     try {
-        const histRes = await authenticatedFetch(`${API_BASE_URL}/skills/history`);
+        const histRes = await authenticatedFetch(`/skills/history`);
         if (histRes.ok) {
             const histData = await histRes.json();
             const attempts = Array.isArray(histData.data) ? histData.data : [];
@@ -781,7 +781,7 @@ async function startVerification(skill) {
     resultDiv.classList.add('hidden');
 
     try {
-        const res = await authenticatedFetch(`${API_BASE_URL}/ai/quiz`, {
+        const res = await authenticatedFetch(`/ai/quiz`, {
             method: 'POST',
             body: JSON.stringify({ skill })
         });
@@ -939,7 +939,7 @@ async function fetchAIFeedback(skill, score, total) {
     text.innerText = 'Getting personalized feedback from AI...';
 
     try {
-        const res = await authenticatedFetch(`${API_BASE_URL}/ai/feedback`, {
+        const res = await authenticatedFetch(`/ai/feedback`, {
             method: 'POST',
             body: JSON.stringify({ skill, score, total })
         });
@@ -956,7 +956,7 @@ async function fetchAIFeedback(skill, score, total) {
 
 async function saveVerification(score, passed) {
     const skill = currentQuizSkill;
-    const response = await authenticatedFetch(`${API_BASE_URL}/skills/submit`, {
+    const response = await authenticatedFetch(`/skills/submit`, {
         method: 'POST',
         body: JSON.stringify({ user_id: currentUser.id, skill_name: skill, score, passed })
     });

@@ -5,7 +5,7 @@ const {
 module.exports = (sequelize, DataTypes) => {
     class Company extends Model {
         static associate(models) {
-            Company.hasMany(models.Internship, { foreignKey: 'companyId' });
+            // Association removed - internships table doesn't have companyId column
         }
     }
     Company.init({

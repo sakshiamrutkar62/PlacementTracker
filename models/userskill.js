@@ -11,16 +11,18 @@ module.exports = (sequelize, DataTypes) => {
     }
     UserSkill.init({
         userId: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.UUID,
             primaryKey: true,
+            field: 'user_id',
             references: {
                 model: 'users',
                 key: 'id'
             }
         },
         skillId: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.BIGINT,
             primaryKey: true,
+            field: 'skill_id',
             references: {
                 model: 'skills',
                 key: 'id'
@@ -30,6 +32,10 @@ module.exports = (sequelize, DataTypes) => {
         sequelize,
         modelName: 'UserSkill',
         tableName: 'user_skills',
+        underscored: true,
+        timestamps: true,
+        createdAt: 'created_at',
+        updatedAt: false
     });
     return UserSkill;
 };

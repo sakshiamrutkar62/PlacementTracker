@@ -11,20 +11,28 @@ module.exports = (sequelize, DataTypes) => {
     }
     Application.init({
         status: {
-            type: DataTypes.ENUM('applied', 'shortlisted', 'rejected', 'hired'),
+            type: DataTypes.STRING,
             defaultValue: 'applied'
         },
+        ai_feedback: DataTypes.TEXT,
+        ai_reason: DataTypes.TEXT,
+        applied_at: {
+            type: DataTypes.DATE,
+            defaultValue: DataTypes.NOW
+        },
         userId: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.UUID,
             allowNull: false,
+            field: 'user_id',
             references: {
                 model: 'users',
                 key: 'id'
             }
         },
         internshipId: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.UUID,
             allowNull: false,
+            field: 'internship_id',
             references: {
                 model: 'internships',
                 key: 'id'
@@ -34,6 +42,8 @@ module.exports = (sequelize, DataTypes) => {
         sequelize,
         modelName: 'Application',
         tableName: 'applications',
+        underscored: true,
+        timestamps: false
     });
     return Application;
 };

@@ -8,9 +8,14 @@ async function authenticatedFetch(url, options = {}) {
     const token = localStorage.getItem('token');
 
     const headers = {
-        'Content-Type': 'application/json',
         ...options.headers,
     };
+
+    // Only set Content-Type to JSON if not sending FormData
+    // (FormData needs the browser to set Content-Type with boundary)
+    if (!(options.body instanceof FormData)) {
+        headers['Content-Type'] = 'application/json';
+    }
 
     if (token) {
         headers['Authorization'] = `Bearer ${token}`;

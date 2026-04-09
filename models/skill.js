@@ -18,6 +18,10 @@ module.exports = (sequelize, DataTypes) => {
         sequelize,
         modelName: 'Skill',
         tableName: 'skills',
+        underscored: true,
+        timestamps: true,
+        createdAt: 'created_at',
+        updatedAt: false
     });
     return Skill;
 };

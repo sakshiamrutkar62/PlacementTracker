@@ -1,5 +1,7 @@
 'use strict';
 
+require('dotenv').config(); // Load environment variables first
+
 const fs = require('fs');
 const path = require('path');
 const Sequelize = require('sequelize');
@@ -14,26 +16,17 @@ if (fs.existsSync(configPath)) {
     config = require(configPath)[env];
 } else {
     // Fallback to environment variables if config.json doesn't exist
-    if (env === 'production' && process.env.DATABASE_URL) {
-        config = {
-            use_env_variable: 'DATABASE_URL',
-            dialect: 'postgres',
-            dialectOptions: {
-                ssl: {
-                    require: true,
-                    rejectUnauthorized: false
-                }
+    config = {
+        use_env_variable: 'DATABASE_URL',
+        dialect: 'postgres',
+        dialectOptions: {
+            ssl: {
+                require: true,
+                rejectUnauthorized: false
             }
-        };
-    } else {
-        config = {
-            database: process.env.DB_NAME,
-            username: process.env.DB_USER,
-            password: process.env.DB_PASSWORD,
-            host: process.env.DB_HOST,
-            dialect: 'postgres'
-        };
-    }
+        },
+        logging: false // Disable SQL query logging
+    };
 }
 
 const db = {};

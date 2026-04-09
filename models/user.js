@@ -22,9 +22,13 @@ module.exports = (sequelize, DataTypes) => {
                 isEmail: true,
             },
         },
-        password: {
+        password_hash: {
             type: DataTypes.STRING,
-            allowNull: false,
+            allowNull: true,
+        },
+        password: {
+            type: DataTypes.VIRTUAL,
+            allowNull: true,
         },
         role: {
             type: DataTypes.ENUM('student', 'admin'),
@@ -38,30 +42,49 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.BOOLEAN,
             defaultValue: false,
         },
-        password_reset_token: DataTypes.STRING,
-        password_reset_expires: DataTypes.DATE,
+        password_reset_token: {
+            type: DataTypes.STRING,
+            field: 'reset_token'
+        },
+        password_reset_expires: {
+            type: DataTypes.DATE,
+            field: 'reset_token_expiry'
+        },
     }, {
         sequelize,
         modelName: 'User',
         tableName: 'users',
+        underscored: true, // Use snake_case for database columns
+        timestamps: true,
+        createdAt: 'created_at',
+        updatedAt: false, // No updated_at column in database
         hooks: {
             beforeCreate: async (user) => {
-                if (user.password) {
+                if (user.password_hash) {
                     const salt = await bcrypt.genSalt(10);
-                    user.password = await bcrypt.hash(user.password, salt);
+                    user.password_hash = await bcrypt.hash(user.password_hash, salt);
+                } else if (user.password) {
+                    const salt = await bcrypt.genSalt(10);
+                    user.password_hash = await bcrypt.hash(user.password, salt);
+                    user.password = null; // Clear legacy field
                 }
             },
             beforeUpdate: async (user) => {
-                if (user.changed('password')) {
+                if (user.changed('password_hash')) {
                     const salt = await bcrypt.genSalt(10);
-                    user.password = await bcrypt.hash(user.password, salt);
+                    user.password_hash = await bcrypt.hash(user.password_hash, salt);
+                } else if (user.changed('password')) {
+                    const salt = await bcrypt.genSalt(10);
+                    user.password_hash = await bcrypt.hash(user.password, salt);
+                    user.password = null; // Clear legacy field
                 }
             },
         },
     });
 
     User.prototype.correctPassword = async function (candidatePassword) {
-        return await bcrypt.compare(candidatePassword, this.password);
+        const passwordToCheck = this.password_hash || this.password;
+        return await bcrypt.compare(candidatePassword, passwordToCheck);
     };
 
     return User;

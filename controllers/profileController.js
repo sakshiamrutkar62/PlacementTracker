@@ -6,7 +6,7 @@ const pool = require('../config/db');
 const supabase = require('../config/supabaseClient');
 const AppError = require('../utils/appError');
 const PDFParser = require("pdf2json");
-const { PDFParse: PDFParseV2 } = require("pdf-parse");
+
 
 function getResumeBucketCandidates() {
     const configuredBucket =
@@ -80,8 +80,16 @@ async function parsePdfWithPdf2json(fileBuffer) {
 /**
  * Attempt 2: Parse PDF with pdf-parse (pdfjs-based, more compatible).
  * Returns extracted text or throws on failure.
+ * Uses lazy import to avoid crashing the server if pdf-parse has issues.
  */
 async function parsePdfWithPdfParse(fileBuffer) {
+    let PDFParseV2;
+    try {
+        PDFParseV2 = require('pdf-parse').PDFParse;
+    } catch (importErr) {
+        throw new Error('pdf-parse module could not be loaded: ' + importErr.message);
+    }
+
     const parser = new PDFParseV2({ verbosity: 0, data: new Uint8Array(fileBuffer) });
     await parser.load();
     const result = await parser.getText();

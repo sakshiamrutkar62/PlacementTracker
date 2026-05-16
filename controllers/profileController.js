@@ -6,6 +6,7 @@ const pool = require('../config/db');
 const supabase = require('../config/supabaseClient');
 const AppError = require('../utils/appError');
 const PDFParser = require("pdf2json");
+const { PDFParse: PDFParseV2 } = require("pdf-parse");
 
 function getResumeBucketCandidates() {
     const configuredBucket =
@@ -15,6 +16,81 @@ function getResumeBucketCandidates() {
 
     // Try configured bucket first, then common defaults.
     return [...new Set([configuredBucket, 'resumes', 'resume', 'user-uploads', 'resume-storage', 'student-resumes'])];
+}
+
+/**
+ * Attempt 1: Parse PDF with pdf2json.
+ * Returns extracted text or throws on failure.
+ */
+async function parsePdfWithPdf2json(fileBuffer) {
+    const originalWarn = console.warn;
+    console.warn = () => {};
+
+    try {
+        const pdfParser = new PDFParser(null, 1);
+
+        const text = await new Promise((resolve, reject) => {
+            // Timeout guard — some PDFs cause pdf2json to hang silently
+            const timeout = setTimeout(() => {
+                reject(new Error('pdf2json timed out after 15 seconds'));
+            }, 15000);
+
+            pdfParser.on("pdfParser_dataError", errData => {
+                clearTimeout(timeout);
+                reject(new Error(errData.parserError));
+            });
+
+            pdfParser.on("pdfParser_dataReady", pdfData => {
+                clearTimeout(timeout);
+                try {
+                    if (!pdfData || !Array.isArray(pdfData.Pages) || pdfData.Pages.length === 0) {
+                        reject(new Error('PDF has no pages'));
+                        return;
+                    }
+                    const extracted = pdfData.Pages.map(page =>
+                        (page.Texts || [])
+                            .map(text => {
+                                try {
+                                    if (text.R && text.R.length > 0 && text.R[0].T) {
+                                        return decodeURIComponent(text.R[0].T);
+                                    }
+                                    return '';
+                                } catch {
+                                    return '';
+                                }
+                            })
+                            .filter(Boolean)
+                            .join(" ")
+                    ).join(" ");
+                    resolve(extracted);
+                } catch (err) {
+                    reject(err);
+                }
+            });
+
+            pdfParser.parseBuffer(fileBuffer);
+        });
+
+        return text;
+    } finally {
+        console.warn = originalWarn;
+    }
+}
+
+/**
+ * Attempt 2: Parse PDF with pdf-parse (pdfjs-based, more compatible).
+ * Returns extracted text or throws on failure.
+ */
+async function parsePdfWithPdfParse(fileBuffer) {
+    const parser = new PDFParseV2({ verbosity: 0, data: new Uint8Array(fileBuffer) });
+    await parser.load();
+    const result = await parser.getText();
+
+    if (!result || !Array.isArray(result.pages) || result.pages.length === 0) {
+        throw new Error('pdf-parse returned no pages');
+    }
+
+    return result.pages.map(pg => pg.text || '').join(' ');
 }
 
 exports.getProfile = async (req, res, next) => {
@@ -39,41 +115,27 @@ exports.uploadResume = async (req, res, next) => {
 
         let extractedSkills = [];
         let pdfText = '';
-        
-        // Parse PDF using pdf2json (suppress console warnings)
+        let parseWarning = null;
+
+        // --- PDF text extraction with dual-parser fallback ---
+        // Try pdf2json first, then pdf-parse. If both fail, continue
+        // the upload without skill extraction (do NOT block the user).
         try {
-            // Temporarily suppress console.warn to hide "fake worker" warning
-            const originalWarn = console.warn;
-            console.warn = () => {};
-            
-            const pdfParser = new PDFParser(null, 1);
-            
-            await new Promise((resolve, reject) => {
-                pdfParser.on("pdfParser_dataError", errData => reject(new Error(errData.parserError)));
-                pdfParser.on("pdfParser_dataReady", pdfData => {
-                    try {
-                        pdfText = pdfData.Pages.map(page => 
-                            page.Texts.map(text => decodeURIComponent(text.R[0].T)).join(" ")
-                        ).join(" ");
-                        resolve();
-                    } catch (err) {
-                        reject(err);
-                    }
-                });
-                
-                pdfParser.parseBuffer(fileBuffer);
-            });
-            
-            // Restore console.warn
-            console.warn = originalWarn;
-            
-            logger.info(`PDF parsed successfully - ${pdfText.length} characters extracted`);
+            pdfText = await parsePdfWithPdf2json(fileBuffer);
+            logger.info(`PDF parsed with pdf2json - ${pdfText.length} characters extracted`);
+        } catch (err1) {
+            logger.warn('pdf2json failed, trying pdf-parse fallback:', err1.message);
+            try {
+                pdfText = await parsePdfWithPdfParse(fileBuffer);
+                logger.info(`PDF parsed with pdf-parse fallback - ${pdfText.length} characters extracted`);
+            } catch (err2) {
+                logger.warn('pdf-parse fallback also failed:', err2.message);
+                parseWarning = 'Could not extract text from PDF. Resume uploaded but skills were not auto-detected.';
+            }
+        }
+
+        if (pdfText) {
             logger.info('PDF text preview:', pdfText.substring(0, 500));
-        } catch (parseError) {
-            logger.error('PDF parsing failed:', parseError);
-            return res.status(400).json({ 
-                message: 'Failed to parse PDF file. Please ensure it is a valid, unencrypted PDF.' 
-            });
         }
 
         // Extract skills from parsed text
@@ -189,13 +251,19 @@ exports.uploadResume = async (req, res, next) => {
             });
         }
 
-        res.json({
+        const response = {
             status: 'success',
-            message: 'Resume uploaded successfully!',
+            message: parseWarning
+                ? 'Resume uploaded! However, skills could not be auto-detected from this PDF.'
+                : 'Resume uploaded successfully!',
             resume_url: publicURL,
             skills_identified: extractedSkills,
             recommended_jobs: matchedJobs
-        });
+        };
+        if (parseWarning) {
+            response.warning = parseWarning;
+        }
+        res.json(response);
 
     } catch (err) {
         logger.error("Server Error in uploadResume:", err);

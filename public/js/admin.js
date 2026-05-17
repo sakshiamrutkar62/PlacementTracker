@@ -1,4 +1,4 @@
-﻿/* =========================================================
+/* =========================================================
     Placement Tracker Admin Panel JS
    ========================================================= */
 
@@ -92,7 +92,7 @@ document.getElementById('postJobForm').addEventListener('submit', async (e) => {
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Publishing...';
 
     try {
-        const res = await authenticatedFetch('/api/internships', {
+        const res = await authenticatedFetch('/internships', {
             method: 'POST',
             body: JSON.stringify({ company_name, role_title, stipend, duration, mode, type, location, deadline, required_skills })
         });
@@ -121,7 +121,7 @@ async function loadAllApplications() {
         <i class="fas fa-spinner fa-spin fa-2x"></i><br><br>Loading applications...</td></tr>`;
 
     try {
-        const res = await authenticatedFetch('/api/applications/admin-view');
+        const res = await authenticatedFetch('/applications/admin-view');
         if (!res.ok) throw new Error('Fetch failed');
         const data = await res.json();
         allAppsCache = Array.isArray(data) ? data : (data.data || []);
@@ -268,7 +268,7 @@ async function confirmStatusUpdate() {
 
 async function updateStatus(appId, newStatus, reason) {
     try {
-        const res = await authenticatedFetch(`/api/applications/${appId}/status`, {
+        const res = await authenticatedFetch(`/applications/${appId}/status`, {
             method: 'PUT',
             body: JSON.stringify({ status: newStatus, reason: reason || '' })
         });
@@ -288,7 +288,7 @@ async function updateStatus(appId, newStatus, reason) {
 // ---------- 4. ANALYTICS TAB ----------
 async function loadAdminStats() {
     try {
-        const res = await authenticatedFetch('/api/applications/admin-view');
+        const res = await authenticatedFetch('/applications/admin-view');
         if (!res.ok) throw new Error();
         const data = await res.json();
         const apps = Array.isArray(data) ? data : (data.data || []);
@@ -354,7 +354,7 @@ async function loadStudents() {
         <i class="fas fa-spinner fa-spin fa-2x"></i><br><br>Loading students...</td></tr>`;
 
     try {
-        const res = await authenticatedFetch('/api/admin/students');
+        const res = await authenticatedFetch('/admin/students');
         if (!res.ok) throw new Error('Fetch failed');
         const data = await res.json();
         allStudentsCache = Array.isArray(data.data) ? data.data : [];
@@ -427,7 +427,7 @@ function renderStudentsTable(students) {
 
 async function toggleCollegeVerify(studentId, verified) {
     try {
-        const res = await authenticatedFetch(`/api/admin/students/${studentId}/verify`, {
+        const res = await authenticatedFetch(`/admin/students/${studentId}/verify`, {
             method: 'PUT',
             body: JSON.stringify({ college_verified: verified })
         });
@@ -449,8 +449,8 @@ async function toggleCollegeVerify(studentId, verified) {
 async function loadApplyDropdowns() {
     try {
         const [studRes, intRes] = await Promise.all([
-            authenticatedFetch('/api/admin/students'),
-            authenticatedFetch('/api/internships')
+            authenticatedFetch('/admin/students'),
+            authenticatedFetch('/internships')
         ]);
         const studData = await studRes.json();
         const intData = await intRes.json();
@@ -484,7 +484,7 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
 
             try {
-                const res = await authenticatedFetch('/api/admin/applications', {
+                const res = await authenticatedFetch('/admin/applications', {
                     method: 'POST',
                     body: JSON.stringify({ student_id, internship_id })
                 });
@@ -518,7 +518,7 @@ async function loadRankings() {
     if (podium) podium.innerHTML = '';
 
     try {
-        const res = await authenticatedFetch('/api/admin/rankings');
+        const res = await authenticatedFetch('/admin/rankings');
         if (!res.ok) throw new Error('Fetch failed');
         const data = await res.json();
         allRankingsCache = Array.isArray(data.data) ? data.data : [];
